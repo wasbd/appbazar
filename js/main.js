@@ -1,0 +1,296 @@
+/* ==========================================================================
+   main.js — সাইটের কনফিগ, রেন্ডারিং, নেভিগেশন, "কিনুন" মডাল
+   ---------------------------------------------------------------
+   এই ফাইলের একদম উপরের SITE_CONFIG অবজেক্টটাই একমাত্র জায়গা যেখানে আপনাকে
+   নিজের নাম-নম্বর-লিংক বসাতে হবে। বাকি কোড এমনিতেই কাজ করবে।
+   ========================================================================== */
+
+const SITE_CONFIG = {
+  siteName: 'অ্যাপবাজার',
+  ownerName: 'আপনার নাম / প্রতিষ্ঠানের নাম',
+  tagline: 'স্থানীয় ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
+  email: 'you@example.com',
+  whatsappNumber: '8801XXXXXXXXX',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
+  bkashNumber: '01XXXXXXXXX',
+  nagadNumber: '01XXXXXXXXX',
+  facebook: '#',
+  socialLinks: [
+    { label:'Facebook', icon:'f', url:'#' },
+    { label:'YouTube',  icon:'▶', url:'#' },
+  ],
+};
+
+/* ---------- ছোট হেল্পার ---------- */
+const $  = (sel, root=document) => root.querySelector(sel);
+const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
+function fmtTaka(n){ return n===0 ? 'ফ্রি' : `৳${Number(n).toLocaleString('bn-BD')}`; }
+function getParam(name){ return new URLSearchParams(window.location.search).get(name); }
+
+function toast(msg){
+  let el = $('#toast');
+  if(!el){ el = document.createElement('div'); el.id='toast'; document.body.appendChild(el); }
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(()=> el.classList.remove('show'), 2600);
+}
+
+/* ---------- হেডার/ফুটার/সাধারণ চেরোম বসানো (প্রতিটা পেজে একই রাখতে) ---------- */
+function paintChrome(activePage){
+  $$('[data-site-name]').forEach(el=> el.textContent = SITE_CONFIG.siteName);
+  $$('[data-owner-name]').forEach(el=> el.textContent = SITE_CONFIG.ownerName);
+  $$('[data-year]').forEach(el=> el.textContent = new Date().getFullYear());
+  $$('[data-email]').forEach(el=> { el.textContent = SITE_CONFIG.email; el.href = 'mailto:'+SITE_CONFIG.email; });
+  $$('[data-whatsapp-link]').forEach(el=> el.href = waLink('আসসালামু আলাইকুম, আমি '+SITE_CONFIG.siteName+' সম্পর্কে জানতে চাই।'));
+  $$(`.main-nav a[data-page]`).forEach(a=>{
+    a.classList.toggle('active', a.dataset.page===activePage);
+  });
+
+  const toggle = $('.nav-toggle');
+  const nav = $('.main-nav');
+  if(toggle && nav){
+    toggle.addEventListener('click', ()=>{
+      const open = nav.style.display === 'flex';
+      nav.style.display = open ? '' : 'flex';
+      if(!open){
+        nav.style.cssText = 'display:flex; position:absolute; top:78px; left:0; right:0; background:#FFFCF6; flex-direction:column; padding:14px 20px; gap:4px; border-bottom:2px solid var(--border);';
+      }
+    });
+  }
+}
+
+function waLink(text){
+  return `https://wa.me/${SITE_CONFIG.whatsappNumber}?text=${encodeURIComponent(text)}`;
+}
+
+/* ---------- অ্যাপ কার্ড / থাম্বনেইল রেন্ডার ---------- */
+const ACCENT_GRADIENTS = {
+  pink:   'linear-gradient(135deg, #FF3E70, #FF9AAE)',
+  teal:   'linear-gradient(135deg, #04A777, #6FE3BE)',
+  yellow: 'linear-gradient(135deg, #FFB627, #FFDD94)',
+  violet: 'linear-gradient(135deg, #7B5CFA, #C6B7FF)',
+};
+
+function appCardHtml(p){
+  const soon = p.status==='soon';
+  return `
+  <div class="app-card ${soon?'soon':''}">
+    <a href="app.html?slug=${p.slug}" class="app-thumb" style="background:${ACCENT_GRADIENTS[p.accent]||ACCENT_GRADIENTS.pink}">
+      ${p.icon||'📦'}
+      <span class="tag ${soon?'soon':p.accent} thumb-tag">${soon? 'শীঘ্রই আসছে' : (CATEGORIES.find(c=>c.id===p.category)||{}).label||''}</span>
+    </a>
+    <div class="app-body">
+      <h3><a href="app.html?slug=${p.slug}">${p.name}</a></h3>
+      <p class="app-tagline">${p.tagline}</p>
+      <div class="app-meta-row">
+        <div class="app-price">${soon? '—' : fmtTaka(p.price)} ${(!soon && p.priceNote)? `<small>${p.priceNote}</small>`:''}</div>
+        <div class="app-actions">
+          ${soon
+            ? `<span class="tag soon">প্রিভিউ</span>`
+            : `<a class="btn btn-outline btn-sm" href="app.html?slug=${p.slug}">দেখুন</a>`}
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderGrid(container, list){
+  if(!container) return;
+  if(!list.length){ container.innerHTML = `<div class="empty-note">এই ফিল্টারে কোনো অ্যাপ পাওয়া যায়নি।</div>`; return; }
+  container.innerHTML = list.map(appCardHtml).join('');
+}
+
+/* ---------- হোমপেজ: ফিচারড অ্যাপ ---------- */
+function initHomeApps(){
+  const grid = $('#featured-apps-grid');
+  if(!grid) return;
+  renderGrid(grid, PRODUCTS.slice(0,3));
+}
+
+/* ---------- ক্যাটালগ পেজ: সার্চ + ক্যাটাগরি ফিল্টার ---------- */
+function initCatalog(){
+  const grid = $('#catalog-grid');
+  const chipRow = $('#category-strip');
+  const searchInput = $('#catalog-search');
+  if(!grid || !chipRow) return;
+
+  chipRow.innerHTML = `<button class="category-chip active" data-cat="all">সব</button>` +
+    CATEGORIES.map(c=>`<button class="category-chip" data-cat="${c.id}">${c.label}</button>`).join('');
+
+  let activeCat = 'all';
+  function apply(){
+    const q = (searchInput?.value||'').trim().toLowerCase();
+    const list = PRODUCTS.filter(p=>{
+      const matchCat = activeCat==='all' || p.category===activeCat;
+      const matchQ = !q || (p.name+p.tagline).toLowerCase().includes(q);
+      return matchCat && matchQ;
+    });
+    renderGrid(grid, list);
+  }
+  chipRow.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.category-chip'); if(!btn) return;
+    activeCat = btn.dataset.cat;
+    $$('.category-chip', chipRow).forEach(b=>b.classList.toggle('active', b===btn));
+    apply();
+  });
+  searchInput?.addEventListener('input', apply);
+  apply();
+}
+
+/* ---------- ডিটেইল পেজ ---------- */
+function initDetailPage(){
+  const root = $('#app-detail-root');
+  if(!root) return;
+  const slug = getParam('slug');
+  const p = PRODUCTS.find(x=>x.slug===slug);
+  if(!p){
+    root.innerHTML = `<div class="empty-note">এই অ্যাপটা খুঁজে পাওয়া যায়নি। <a href="apps.html">সব অ্যাপ দেখুন →</a></div>`;
+    document.title = 'পাওয়া যায়নি — ' + SITE_CONFIG.siteName;
+    return;
+  }
+  document.title = `${p.name} — ${SITE_CONFIG.siteName}`;
+  const soon = p.status==='soon';
+  const catLabel = (CATEGORIES.find(c=>c.id===p.category)||{}).label||'';
+
+  root.innerHTML = `
+    <div class="detail-hero">
+      <div class="detail-thumb" style="background:${ACCENT_GRADIENTS[p.accent]||ACCENT_GRADIENTS.pink}">${p.icon||'📦'}</div>
+      <div class="detail-info">
+        <span class="tag ${soon?'soon':p.accent}">${soon?'শীঘ্রই আসছে':catLabel}</span>
+        <h1>${p.name}</h1>
+        <p style="font-size:1.08rem">${p.tagline}</p>
+        ${p.demoUrl && !soon ? `<a class="btn btn-outline" href="${p.demoUrl}" target="_blank" rel="noopener">🔍 লাইভ ডেমো দেখুন</a>` : ''}
+        <div class="price-box">
+          ${soon
+            ? `<p style="margin:0">এই অ্যাপটা এখনো তৈরি হচ্ছে — মুক্তি পেলে সবার আগে জানতে যোগাযোগ করে রাখতে পারেন।</p>`
+            : `<div class="price-big">${fmtTaka(p.price)} ${p.priceNote?`<small>${p.priceNote}</small>`:''}</div>`}
+          <div class="detail-actions">
+            ${soon
+              ? `<a class="btn btn-dark btn-block" href="${waLink('আসসালামু আলাইকুম, \"'+p.name+'\" অ্যাপটা মুক্তি পেলে আমাকে জানাবেন।')}" target="_blank" rel="noopener">🔔 মুক্তি পেলে জানাতে বলুন</a>`
+              : `<button class="btn btn-primary btn-block" id="open-buy-btn">🛒 কিনুন</button>`}
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="detail-body">
+      <div>
+        <h2>বিস্তারিত</h2>
+        ${p.description.split('\n\n').map(para=>`<p>${para}</p>`).join('')}
+      </div>
+      <div>
+        ${p.features && p.features.length ? `
+        <h2>যা যা থাকছে</h2>
+        <ul class="feature-list">
+          ${p.features.map(f=>`<li><span class="ic">✓</span>${f}</li>`).join('')}
+        </ul>` : ''}
+      </div>
+    </div>
+  `;
+
+  if(!soon){
+    $('#open-buy-btn')?.addEventListener('click', ()=> openBuyModal(p));
+  }
+}
+
+/* ---------- "কিনুন" মডাল ---------- */
+function ensureModal(){
+  if($('#buy-modal')) return;
+  const el = document.createElement('div');
+  el.id = 'buy-modal';
+  el.className = 'modal-overlay';
+  el.innerHTML = `
+    <div class="modal-box">
+      <button class="modal-close" id="buy-modal-close">✕</button>
+      <h3 id="buy-modal-title">কিনুন</h3>
+      <p class="modal-app-name" id="buy-modal-appname"></p>
+      <div class="buy-tabs">
+        <button class="buy-tab active" data-tab="whatsapp">💬 WhatsApp-এ অর্ডার</button>
+        <button class="buy-tab" data-tab="manual">💳 bKash/Nagad</button>
+      </div>
+      <div class="pay-panel active" data-panel="whatsapp">
+        <div class="wa-preview" id="wa-preview-text"></div>
+        <a class="btn btn-teal btn-block" id="wa-send-btn" target="_blank" rel="noopener">WhatsApp-এ পাঠান</a>
+      </div>
+      <div class="pay-panel" data-panel="manual">
+        <div class="pay-number-box">
+          <div><span class="method">bKash (Personal/Send Money)</span><b id="bkash-number-text"></b></div>
+          <button class="copy-btn" data-copy-target="bkash-number-text">কপি</button>
+        </div>
+        <div class="pay-number-box">
+          <div><span class="method">Nagad (Personal/Send Money)</span><b id="nagad-number-text"></b></div>
+          <button class="copy-btn" data-copy-target="nagad-number-text">কপি</button>
+        </div>
+        <p class="pay-note">উপরের নম্বরে টাকা পাঠিয়ে নিচের ফর্মটা পূরণ করুন — অর্ডার কনফার্ম করে দ্রুত যোগাযোগ করা হবে।</p>
+        <form id="manual-order-form">
+          <div class="form-field"><label>আপনার নাম</label><input type="text" name="name" required /></div>
+          <div class="form-field"><label>মোবাইল নম্বর</label><input type="tel" name="phone" required /></div>
+          <div class="form-field"><label>পেমেন্ট মাধ্যম</label>
+            <select name="method"><option>bKash</option><option>Nagad</option></select>
+          </div>
+          <div class="form-field"><label>ট্রানজেকশন আইডি</label><input type="text" name="txn" required /></div>
+          <button class="btn btn-primary btn-block" type="submit">✅ অর্ডার সাবমিট করুন</button>
+        </form>
+      </div>
+    </div>`;
+  document.body.appendChild(el);
+
+  el.addEventListener('click', (e)=>{ if(e.target===el) closeBuyModal(); });
+  $('#buy-modal-close').addEventListener('click', closeBuyModal);
+
+  $$('.buy-tab', el).forEach(tab=>{
+    tab.addEventListener('click', ()=>{
+      $$('.buy-tab', el).forEach(t=>t.classList.toggle('active', t===tab));
+      $$('.pay-panel', el).forEach(p=>p.classList.toggle('active', p.dataset.panel===tab.dataset.tab));
+    });
+  });
+  $$('.copy-btn', el).forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const text = $('#'+btn.dataset.copyTarget).textContent;
+      navigator.clipboard?.writeText(text).then(()=> toast('নম্বর কপি হয়েছে ✅')).catch(()=>{});
+    });
+  });
+  $('#manual-order-form').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const name = f.get('name'), phone = f.get('phone'), method = f.get('method'), txn = f.get('txn');
+    const appName = $('#buy-modal-appname').dataset.appName || '';
+    const msg = `অর্ডার নিশ্চিতকরণ\nঅ্যাপ: ${appName}\nনাম: ${name}\nমোবাইল: ${phone}\nপেমেন্ট: ${method}\nট্রানজেকশন আইডি: ${txn}`;
+    window.open(waLink(msg), '_blank');
+    toast('অর্ডার তথ্য পাঠানো হয়েছে — শীঘ্রই যোগাযোগ করা হবে ✅');
+    e.target.reset();
+    closeBuyModal();
+  });
+}
+function openBuyModal(product){
+  ensureModal();
+  $('#buy-modal-appname').textContent = product.name + ' — ' + fmtTaka(product.price) + (product.priceNote?' ('+product.priceNote+')':'');
+  $('#buy-modal-appname').dataset.appName = product.name;
+  $('#bkash-number-text').textContent = SITE_CONFIG.bkashNumber;
+  $('#nagad-number-text').textContent = SITE_CONFIG.nagadNumber;
+  const waText = `আসসালামু আলাইকুম, আমি "${product.name}" অ্যাপটা (${fmtTaka(product.price)}) কিনতে চাই।`;
+  $('#wa-preview-text').textContent = waText;
+  $('#wa-send-btn').href = waLink(waText);
+  $('#buy-modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeBuyModal(){
+  $('#buy-modal')?.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+/* ---------- বুট ---------- */
+document.addEventListener('DOMContentLoaded', ()=>{
+  const page = document.body.dataset.page || '';
+  paintChrome(page);
+  initHomeApps();
+  initCatalog();
+  initDetailPage();
+
+  // "কিনুন" বাটন — হোম/ক্যাটালগ কার্ড থেকেও যদি সরাসরি খোলার দরকার হয়
+  document.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-buy-slug]');
+    if(!btn) return;
+    const p = PRODUCTS.find(x=>x.slug===btn.dataset.buySlug);
+    if(p) openBuyModal(p);
+  });
+});
