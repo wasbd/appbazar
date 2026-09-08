@@ -7,17 +7,63 @@
 
 const SITE_CONFIG = {
   siteName: 'অ্যাপবাজার',
-  ownerName: 'Web app solution (ওয়েব এপ সলিউশন)',
+  ownerName: 'আপনার নাম / প্রতিষ্ঠানের নাম',
   tagline: 'স্থানীয় ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
-  email: 'info.wasbd@gmail.com',
-  whatsappNumber: '8801869866899',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
-  bkashNumber: '01740541388',
+  email: 'you@example.com',
+  whatsappNumber: '8801XXXXXXXXX',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
+  bkashNumber: '01XXXXXXXXX',
   nagadNumber: '01XXXXXXXXX',
-  facebook: 'https://web.facebook.com/etsctg',
+  facebook: '#',
   socialLinks: [
-    { label:'Facebook', icon:'f', url:'https://web.facebook.com/etsctg' },
+    { label:'Facebook', icon:'f', url:'#' },
     { label:'YouTube',  icon:'▶', url:'#' },
   ],
+
+  /* ------------------------------------------------------------------
+     অর্ডার ব্যাকআপ (ঐচ্ছিক, কিন্তু জোরালোভাবে সুপারিশ করা হচ্ছে)
+     ------------------------------------------------------------------
+     সমস্যাটা যা সমাধান করে: এখন কাস্টমার ফর্ম পূরণ করলে সেটা শুধু WhatsApp-এ
+     একটা মেসেজ খুলে দেয় — কিন্তু কাস্টমার যদি ভুলে "Send" না চাপে, সেই
+     অর্ডারটা কোথাও থাকবে না, একদম হারিয়ে যাবে। নিচের দুটোর যেকোনো একটা
+     (বা দুটোই) কনফিগার করলে, "Send" চাপুক বা না চাপুক, ফর্ম সাবমিট করা
+     মাত্রই ডাটাটা ব্যাকআপ হিসেবে সেভ হয়ে যাবে — কোনো কোড লেখা লাগবে না,
+     শুধু নিচের ফাঁকা জায়গাগুলো পূরণ করুন। দুটোই ফাঁকা রাখলে এই ফিচারটা
+     এমনিই বন্ধ থাকবে, সাইট আগের মতোই (শুধু WhatsApp-নির্ভর) কাজ করবে।
+
+     ১) Formspree (সবচেয়ে দ্রুত সেটআপ, ~৫ মিনিট):
+        ক) https://formspree.io -এ ফ্রি অ্যাকাউন্ট খুলুন
+        খ) "New Form" বানান (নাম যা খুশি দিন)
+        গ) যে endpoint URL দেখাবে (যেমনঃ https://formspree.io/f/mgvzxxxx)
+           সেটা নিচের formspreeEndpoint-এ বসিয়ে দিন
+        ঘ) প্রতিটা সাবমিশনের ইমেইল আপনার ইনবক্সেও চলে আসবে, আর Formspree
+           ড্যাশবোর্ডেও (formspree.io ড্যাশবোর্ড) তালিকা আকারে দেখা যাবে —
+           এটাই সবচেয়ে সহজ "অ্যাডমিন প্যানেল", কোনো কোড ছাড়াই।
+        ফ্রি প্ল্যানে মাসে ৫০টা সাবমিশন পর্যন্ত চলে — শুরুর জন্য যথেষ্ট।
+  */
+  formspreeEndpoint: '', // যেমনঃ 'https://formspree.io/f/mgvzxxxx'
+
+  /* ২) Google Form (ডাটা সরাসরি Google Sheets-এ জমা হয়, স্প্রেডশিটে দেখতে
+        চাইলে এটা সুবিধাজনক):
+        ক) একটা নতুন Google Form বানান, এই প্রশ্নগুলো (ঠিক এই ক্রমে না
+           হলেও চলবে) রাখুন: নাম, মোবাইল, অ্যাপের নাম, পেমেন্ট মাধ্যম,
+           ট্রানজেকশন আইডি
+        খ) ফর্মটা "Send" করার সময় লিংক-আইকনে ক্লিক করে নিজের লিংকটা কপি
+           করুন, শেষের "/viewform" অংশটা "/formResponse" দিয়ে বদলে
+           googleFormUrl-এ বসান
+        গ) প্রতিটা প্রশ্নের নিজস্ব entry নম্বর বের করতে — ফর্মের উপরের
+           ডান দিকের "⋮" মেনু থেকে "Get pre-filled link" চাপুন, প্রতিটা
+           প্রশ্নে যেকোনো একটা টেস্ট উত্তর দিয়ে "Get link" চাপুন — এরপর যে
+           লিংকটা পাবেন তাতে entry.123456789=আপনার-টেস্ট-উত্তর এভাবে
+           প্রতিটা প্রশ্নের entry নম্বর দেখা যাবে — সেগুলো নিচে বসান।
+  */
+  googleFormUrl: '', // যেমনঃ 'https://docs.google.com/forms/d/e/xxxxxxxxxxxxxxxx/formResponse'
+  googleFormFields: {
+    name:   '', // যেমনঃ 'entry.123456789'
+    phone:  '',
+    app:    '',
+    method: '',
+    txn:    '',
+  },
 };
 
 /* ---------- ছোট হেল্পার ---------- */
@@ -33,6 +79,32 @@ function toast(msg){
   el.classList.add('show');
   clearTimeout(el._t);
   el._t = setTimeout(()=> el.classList.remove('show'), 2600);
+}
+
+/* অর্ডার-ব্যাকআপ: WhatsApp-এ "Send" চাপা হোক বা না হোক, ফর্ম সাবমিট হওয়া
+   মাত্রই (কনফিগার করা থাকলে) Formspree/Google Form-এ ডাটা পাঠিয়ে দেয় —
+   ব্যর্থ হলেও নীরবে ব্যর্থ হয়, কখনো WhatsApp ফ্লো আটকায় না। */
+function submitOrderBackup(data){
+  const cfg = SITE_CONFIG;
+  if(cfg.formspreeEndpoint){
+    fetch(cfg.formspreeEndpoint, {
+      method:'POST',
+      headers:{ 'Accept':'application/json', 'Content-Type':'application/json' },
+      body: JSON.stringify(data)
+    }).catch(()=>{ /* ব্যাকআপ ব্যর্থ হলেও চুপচাপ উপেক্ষা করি — WhatsApp-ই প্রধান পথ */ });
+  }
+  if(cfg.googleFormUrl && cfg.googleFormFields){
+    const hasAnyEntry = Object.values(cfg.googleFormFields).some(v=>v);
+    if(hasAnyEntry){
+      const body = new URLSearchParams();
+      Object.entries(cfg.googleFormFields).forEach(([key, entryId])=>{
+        if(entryId) body.append(entryId, data[key] || '');
+      });
+      // Google Forms-এর formResponse এন্ডপয়েন্ট CORS রেসপন্স দেয় না, তাই
+      // mode:'no-cors' — রেসপন্স পড়া যাবে না, কিন্তু সাবমিশন ঠিকই হয়ে যায়।
+      fetch(cfg.googleFormUrl, { method:'POST', mode:'no-cors', body }).catch(()=>{});
+    }
+  }
 }
 
 /* ---------- হেডার/ফুটার/সাধারণ চেরোম বসানো (প্রতিটা পেজে একই রাখতে) ---------- */
@@ -209,7 +281,11 @@ function ensureModal(){
       </div>
       <div class="pay-panel active" data-panel="whatsapp">
         <div class="wa-preview" id="wa-preview-text"></div>
-        <a class="btn btn-teal btn-block" id="wa-send-btn" target="_blank" rel="noopener">WhatsApp-এ পাঠান</a>
+        <form id="whatsapp-order-form">
+          <div class="form-field"><label>আপনার নাম</label><input type="text" name="name" required /></div>
+          <div class="form-field"><label>মোবাইল নম্বর (ঐচ্ছিক)</label><input type="tel" name="phone" /></div>
+          <button class="btn btn-teal btn-block" type="submit">💬 WhatsApp-এ পাঠান</button>
+        </form>
       </div>
       <div class="pay-panel" data-panel="manual">
         <div class="pay-number-box">
@@ -249,12 +325,26 @@ function ensureModal(){
       navigator.clipboard?.writeText(text).then(()=> toast('নম্বর কপি হয়েছে ✅')).catch(()=>{});
     });
   });
+  $('#whatsapp-order-form').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const name = f.get('name'), phone = f.get('phone')||'';
+    const appName = $('#buy-modal-appname').dataset.appName || '';
+    const appPrice = $('#buy-modal-appname').dataset.appPrice || '';
+    const msg = `আসসালামু আলাইকুম, আমি "${appName}" অ্যাপটা (${appPrice}) কিনতে চাই।\nনাম: ${name}${phone?`\nমোবাইল: ${phone}`:''}`;
+    submitOrderBackup({ name, phone, app: appName, method:'WhatsApp', txn:'' });
+    window.open(waLink(msg), '_blank');
+    toast('WhatsApp খুলে যাচ্ছে — বার্তাটা পাঠাতে ভুলবেন না! ✅');
+    e.target.reset();
+    closeBuyModal();
+  });
   $('#manual-order-form').addEventListener('submit', (e)=>{
     e.preventDefault();
     const f = new FormData(e.target);
     const name = f.get('name'), phone = f.get('phone'), method = f.get('method'), txn = f.get('txn');
     const appName = $('#buy-modal-appname').dataset.appName || '';
     const msg = `অর্ডার নিশ্চিতকরণ\nঅ্যাপ: ${appName}\nনাম: ${name}\nমোবাইল: ${phone}\nপেমেন্ট: ${method}\nট্রানজেকশন আইডি: ${txn}`;
+    submitOrderBackup({ name, phone, app: appName, method, txn });
     window.open(waLink(msg), '_blank');
     toast('অর্ডার তথ্য পাঠানো হয়েছে — শীঘ্রই যোগাযোগ করা হবে ✅');
     e.target.reset();
@@ -265,11 +355,10 @@ function openBuyModal(product){
   ensureModal();
   $('#buy-modal-appname').textContent = product.name + ' — ' + fmtTaka(product.price) + (product.priceNote?' ('+product.priceNote+')':'');
   $('#buy-modal-appname').dataset.appName = product.name;
+  $('#buy-modal-appname').dataset.appPrice = fmtTaka(product.price);
   $('#bkash-number-text').textContent = SITE_CONFIG.bkashNumber;
   $('#nagad-number-text').textContent = SITE_CONFIG.nagadNumber;
-  const waText = `আসসালামু আলাইকুম, আমি "${product.name}" অ্যাপটা (${fmtTaka(product.price)}) কিনতে চাই।`;
-  $('#wa-preview-text').textContent = waText;
-  $('#wa-send-btn').href = waLink(waText);
+  $('#wa-preview-text').textContent = `আপনি কিনছেন: ${product.name} — ${fmtTaka(product.price)}`;
   $('#buy-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
