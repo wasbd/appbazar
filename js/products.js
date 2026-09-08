@@ -29,15 +29,16 @@ const CATEGORIES = [
 ];
 
 const PRODUCTS = [
-     {
-    slug:'dokan-hisab',
-    name:'দোকান হিসাব',
-    tagline:'ছোট দোকান ও ব্যবসার দৈনিক বিক্রি-খরচ-বাকি হিসাব রাখার অ্যাপ',
+       {
+    slug:'school',
+    name:'School',
+    tagline:'',
     description:
-`দৈনিক বিক্রি, ক্রয়, বাকি আদায়-প্রদান আর মাস শেষে লাভ-ক্ষতির হিসাব — সহজ ভাষায়, খাতার মতোই সহজ ইন্টারফেসে। এই অ্যাপটি এখন তৈরি হচ্ছে।`,
-    category:'business',
-    price:0,
-    icon:'🧾',
+``,
+    category:'other',
+    price:699,
+    priceNote:'699/ month',
+    icon:'🎓',
     accent:'teal',
     features:[],
     status:'soon'
