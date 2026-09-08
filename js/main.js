@@ -7,15 +7,15 @@
 
 const SITE_CONFIG = {
   siteName: 'অ্যাপবাজার',
-  ownerName: 'আপনার নাম / প্রতিষ্ঠানের নাম',
+  ownerName: 'Web app solution (ওয়েব এপ সলিউশন)',
   tagline: 'স্থানীয় ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
-  email: 'you@example.com',
-  whatsappNumber: '8801XXXXXXXXX',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
-  bkashNumber: '01XXXXXXXXX',
+  email: 'wasbd@gmail.com',
+  whatsappNumber: '8801869866899',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
+  bkashNumber: '01740541388',
   nagadNumber: '01XXXXXXXXX',
   facebook: '#',
   socialLinks: [
-    { label:'Facebook', icon:'f', url:'#' },
+    { label:'Facebook', icon:'f', url:'https://web.facebook.com/etsctg' },
     { label:'YouTube',  icon:'▶', url:'#' },
   ],
 };
