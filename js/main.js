@@ -142,13 +142,35 @@ const ACCENT_GRADIENTS = {
   yellow: 'linear-gradient(135deg, #FFB627, #FFDD94)',
   violet: 'linear-gradient(135deg, #7B5CFA, #C6B7FF)',
 };
+/* thumbnail ছবি দেওয়া থাকলে সেটা দেখাবে, না দিলে emoji+রঙিন গ্র্যাডিয়েন্টে ফিরে যাবে */
+function thumbStyle(p){
+  return p.thumbnail
+    ? `background-image:url('${p.thumbnail}'); background-size:cover; background-position:center;`
+    : `background:${ACCENT_GRADIENTS[p.accent]||ACCENT_GRADIENTS.pink};`;
+}
+/* বিভিন্ন ফরম্যাটের ইউটিউব লিংক (watch?v=, youtu.be/, shorts/, ইতিমধ্যে embed) থেকে
+   embed URL বানায় — কোনোটা না মিললে null ফেরত দেয়, তখন এমবেড না করে শুধু বাটন দেখাই */
+function youtubeEmbedUrl(url){
+  if(!url) return null;
+  const patterns = [
+    /(?:youtu\.be\/)([\w-]{11})/,
+    /(?:youtube\.com\/watch\?v=)([\w-]{11})/,
+    /(?:youtube\.com\/shorts\/)([\w-]{11})/,
+    /(?:youtube\.com\/embed\/)([\w-]{11})/,
+  ];
+  for(const re of patterns){
+    const m = url.match(re);
+    if(m) return `https://www.youtube.com/embed/${m[1]}`;
+  }
+  return null;
+}
 
 function appCardHtml(p){
   const soon = p.status==='soon';
   return `
   <div class="app-card ${soon?'soon':''}">
-    <a href="app.html?slug=${p.slug}" class="app-thumb" style="background:${ACCENT_GRADIENTS[p.accent]||ACCENT_GRADIENTS.pink}">
-      ${p.icon||'📦'}
+    <a href="app.html?slug=${p.slug}" class="app-thumb ${p.thumbnail?'has-image':''}" style="${thumbStyle(p)}">
+      ${p.thumbnail? '' : (p.icon||'📦')}
       <span class="tag ${soon?'soon':p.accent} thumb-tag">${soon? 'শীঘ্রই আসছে' : (CATEGORIES.find(c=>c.id===p.category)||{}).label||''}</span>
     </a>
     <div class="app-body">
@@ -226,12 +248,15 @@ function initDetailPage(){
 
   root.innerHTML = `
     <div class="detail-hero">
-      <div class="detail-thumb" style="background:${ACCENT_GRADIENTS[p.accent]||ACCENT_GRADIENTS.pink}">${p.icon||'📦'}</div>
+      <div class="detail-thumb ${p.thumbnail?'has-image':''}" style="${thumbStyle(p)}">${p.thumbnail? '' : (p.icon||'📦')}</div>
       <div class="detail-info">
         <span class="tag ${soon?'soon':p.accent}">${soon?'শীঘ্রই আসছে':catLabel}</span>
         <h1>${p.name}</h1>
         <p style="font-size:1.08rem">${p.tagline}</p>
-        ${p.demoUrl && !soon ? `<a class="btn btn-outline" href="${p.demoUrl}" target="_blank" rel="noopener">🔍 লাইভ ডেমো দেখুন</a>` : ''}
+        <div class="detail-actions" style="margin-bottom:6px">
+          ${p.demoUrl && !soon ? `<a class="btn btn-outline" href="${p.demoUrl}" target="_blank" rel="noopener">🔍 লাইভ ডেমো দেখুন</a>` : ''}
+          ${p.youtubeUrl ? `<a class="btn btn-outline" href="${p.youtubeUrl}" target="_blank" rel="noopener">▶️ ইউটিউবে দেখুন</a>` : ''}
+        </div>
         <div class="price-box">
           ${soon
             ? `<p style="margin:0">এই অ্যাপটা এখনো তৈরি হচ্ছে — মুক্তি পেলে সবার আগে জানতে যোগাযোগ করে রাখতে পারেন।</p>`
@@ -248,6 +273,12 @@ function initDetailPage(){
       <div>
         <h2>বিস্তারিত</h2>
         ${p.description.split('\n\n').map(para=>`<p>${para}</p>`).join('')}
+        ${youtubeEmbedUrl(p.youtubeUrl) ? `
+        <h2 style="margin-top:34px">🎥 কাজের নমুনা / কীভাবে চালাতে হয়</h2>
+        <div class="video-embed">
+          <iframe src="${youtubeEmbedUrl(p.youtubeUrl)}" title="${p.name} ডেমো ভিডিও" frameborder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>` : ''}
       </div>
       <div>
         ${p.features && p.features.length ? `

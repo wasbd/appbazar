@@ -99,18 +99,28 @@
           <input type="text" name="priceNote" id="f-priceNote" placeholder="যেমনঃ সেটআপ + কাস্টমাইজেশন" />
         </div>
         <div class="form-field">
-          <label>আইকন/ইমোজি</label>
+          <label>থাম্বনেইল/স্ক্রিনশট ছবির লিংক (ঐচ্ছিক)</label>
+          <input type="url" name="thumbnail" id="f-thumbnail" placeholder="https://i.imgur.com/xxxxxxx.jpg" />
+          <div class="preview-note">দিলে নিচের প্রিভিউতে ও কার্ডে emoji-এর বদলে এই ছবিটা দেখাবে। কোনো ইমেজ-হোস্টিং সাইটে (যেমন imgur.com) আপলোড করে সরাসরি ছবির লিংক বসান।</div>
+        </div>
+        <div class="form-field">
+          <label>আইকন/ইমোজি (থাম্বনেইল না দিলে এটা দেখাবে)</label>
           <input type="text" name="icon" id="f-icon" placeholder="📦" />
           <div class="icon-suggest-row" id="icon-suggest"></div>
         </div>
         <div class="form-field">
-          <label>থাম্বনেইলের রঙ</label>
+          <label>থাম্বনেইলের রঙ (থাম্বনেইল ছবি না দিলে ব্যবহার হয়)</label>
           <div class="accent-swatch-row" id="accent-row"></div>
           <input type="hidden" name="accent" id="f-accent" value="pink" />
         </div>
         <div class="form-field">
           <label>লাইভ ডেমো লিংক (ঐচ্ছিক)</label>
           <input type="url" name="demoUrl" id="f-demoUrl" placeholder="https://..." />
+        </div>
+        <div class="form-field">
+          <label>ইউটিউব ভিডিও লিংক (ঐচ্ছিক — কাজের নমুনা/কীভাবে চালাতে হয়)</label>
+          <input type="url" name="youtubeUrl" id="f-youtubeUrl" placeholder="https://youtu.be/xxxxxxxxxxx" />
+          <div class="preview-note">দিলে ডিটেইল পেজে ভিডিওটা সরাসরি এমবেড হয়ে দেখাবে।</div>
         </div>
         <div class="form-field">
           <label>ফিচার লিস্ট (একেক লাইনে একটা)</label>
@@ -216,10 +226,12 @@ function fillForm(p){
   document.getElementById('f-category').value = p.category;
   document.getElementById('f-price').value = p.price;
   document.getElementById('f-priceNote').value = p.priceNote||'';
+  document.getElementById('f-thumbnail').value = p.thumbnail||'';
   document.getElementById('f-icon').value = p.icon||'';
   document.getElementById('f-accent').value = p.accent||'pink';
   document.querySelectorAll('.accent-swatch').forEach(s=>s.classList.toggle('selected', s.dataset.accent===(p.accent||'pink')));
   document.getElementById('f-demoUrl').value = p.demoUrl||'';
+  document.getElementById('f-youtubeUrl').value = p.youtubeUrl||'';
   document.getElementById('f-features').value = (p.features||[]).join('\n');
   document.getElementById('f-status').value = p.status||'live';
   generate();
@@ -239,9 +251,11 @@ function collect(){
     category: document.getElementById('f-category').value,
     price: Number(document.getElementById('f-price').value)||0,
     priceNote: document.getElementById('f-priceNote').value.trim(),
+    thumbnail: document.getElementById('f-thumbnail').value.trim(),
     icon: document.getElementById('f-icon').value.trim() || '📦',
     accent: document.getElementById('f-accent').value,
     demoUrl: document.getElementById('f-demoUrl').value.trim(),
+    youtubeUrl: document.getElementById('f-youtubeUrl').value.trim(),
     features: document.getElementById('f-features').value.split('\n').map(s=>s.trim()).filter(Boolean),
     status: document.getElementById('f-status').value,
   };
@@ -258,9 +272,11 @@ function buildSnippet(d){
   lines.push(`    category:'${d.category}',`);
   lines.push(`    price:${d.price},`);
   if(d.priceNote) lines.push(`    priceNote:'${escSingle(d.priceNote)}',`);
+  if(d.thumbnail) lines.push(`    thumbnail:'${escSingle(d.thumbnail)}',`);
   lines.push(`    icon:'${d.icon}',`);
   lines.push(`    accent:'${d.accent}',`);
   if(d.demoUrl) lines.push(`    demoUrl:'${escSingle(d.demoUrl)}',`);
+  if(d.youtubeUrl) lines.push(`    youtubeUrl:'${escSingle(d.youtubeUrl)}',`);
   if(d.features.length){
     lines.push(`    features:[`);
     d.features.forEach((f,i)=> lines.push(`      '${escSingle(f)}'${i<d.features.length-1?',':''}`));
@@ -289,8 +305,8 @@ function generate(){
   const catLabel = (CATEGORIES.find(c=>c.id===d.category)||{}).label || '';
   document.getElementById('live-preview').innerHTML = `
     <div class="app-card">
-      <div class="app-thumb" style="background:${accentGradient(d.accent)}">
-        ${d.icon||'📦'}
+      <div class="app-thumb ${d.thumbnail?'has-image':''}" style="${d.thumbnail?`background-image:url('${d.thumbnail}'); background-size:cover; background-position:center;`:`background:${accentGradient(d.accent)}`}">
+        ${d.thumbnail? '' : (d.icon||'📦')}
         <span class="tag ${d.status==='soon'?'soon':d.accent} thumb-tag">${d.status==='soon'?'শীঘ্রই আসছে':catLabel}</span>
       </div>
       <div class="app-body">
