@@ -28,13 +28,36 @@
    ========================================================================== */
 
 const CATEGORIES = [
-  { id:'tutoring',     label:'কোচিং/টিউশন' },
+  { id:'education',     label:'কোচিং/টিউশন/বিদ্যালয়' },
   { id:'business',     label:'ব্যবসা/দোকান' },
   { id:'productivity', label:'প্রোডাক্টিভিটি' },
   { id:'other',        label:'অন্যান্য' },
 ];
 
 const PRODUCTS = [
+     {
+    slug:'sas',
+    name:'Self Accounts System',
+    tagline:'এপর্যন্ত বিভিন্ন ভাবে হিসাব রেখেছেন তো, এবার রাখুন, স্বাধীন ভাবে...',
+    description:
+`নিজের মত করে স্বাধীন ভাবে হিসাব রাখুন। নিজের ব্যয় / বাজেট নিজেই করুন। সকল প্র্রকার ডাটা ব্যাকাপ রাখার সু-ব্যবস্থা। এপর্যন্ত অন্যের বিভিন্ন এপ ইউজ করেছেন, কিন্তু কোনকারণে ডিভাইস পরিবর্তন বা অন্য কোন কারনে ঐ এপ আর ইউ করতে পারছেন না, তাদের জন্য এই সেলফ একাউন্টিং সিস্টেম।`,
+    category:'other',
+    price:500,
+    priceNote:'(Promotional offer)',
+    thumbnail:'https://scontent.fcgp44-1.fna.fbcdn.net/v/t39.30808-6/787160272_122119801569381104_3653758320177503236_n.jpg?stp=dst-jpg_tt6&cstp=mx1376x768&ctp=s1376x768&_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_ohc=moNc9oKUebYQ7kNvwHORVut&_nc_oc=Adru32615GSllJsWR2FWasnbH_3eB88ZCgvhilVgGwIRsy1eT9S_7eAyUxnkUaIXugI&_nc_zt=23&_nc_ht=scontent.fcgp44-1.fna&_nc_gid=UL7IXTbbzpnaaFHVZKhtCQ&_nc_ss=7b2a8&oh=00_AQJEKUqkkocKI52isseA0Ag6sl6KlR2qNyeSJpJTw75ynw&oe=6AA7016E',
+    icon:'📊',
+    accent:'pink',
+    demoUrl:'http://dmoaccsys.netlify.app',
+    youtubeUrl:'https://youtu.be/5prskcj4bRA',
+    features:[
+      'মোবাইল/কম্পিউটারে তাৎক্ষণিক এন্ট্রির সুবিধা',
+      'সাপ্তাহিক, মাসিক, বাৎসরিক রিপোর্ট',
+      'একাধিক হিসাব পরিচালনার সুবিধা',
+      'বাজার লিস্ট ও ক্রয়ের চাহিদা ট্র্যাক',
+      'বাজেট অনুসারে ব্যয়ের সুবিধা'
+    ],
+    status:'live'
+  },
   {
     slug:'porar-khata',
     name:'পড়ার খাতা',
