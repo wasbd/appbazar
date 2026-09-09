@@ -44,7 +44,7 @@ const PRODUCTS = [
     category:'other',
     price:500,
     priceNote:'(Promotional offer)',
-    thumbnail:'https://scontent.fcgp44-1.fna.fbcdn.net/v/t39.30808-6/787160272_122119801569381104_3653758320177503236_n.jpg?stp=dst-jpg_tt6&cstp=mx1376x768&ctp=s1376x768&_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_ohc=moNc9oKUebYQ7kNvwHORVut&_nc_oc=Adru32615GSllJsWR2FWasnbH_3eB88ZCgvhilVgGwIRsy1eT9S_7eAyUxnkUaIXugI&_nc_zt=23&_nc_ht=scontent.fcgp44-1.fna&_nc_gid=UL7IXTbbzpnaaFHVZKhtCQ&_nc_ss=7b2a8&oh=00_AQJEKUqkkocKI52isseA0Ag6sl6KlR2qNyeSJpJTw75ynw&oe=6AA7016E',
+    thumbnail:'https://scontent.fdac3-2.fna.fbcdn.net/v/t39.30808-6/787160272_122119801569381104_3653758320177503236_n.jpg?stp=dst-jpg_tt6&cstp=mx1376x768&ctp=s1376x768&_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeGJ2p5SCdXgZGLXCKzeembSmEbzsZxf7ayYRvOxnF_trJ_jir_nrhOUKb2wesRhUgKWFHfE9HRo9ZJliU0_nSaO&_nc_ohc=moNc9oKUebYQ7kNvwGQHG5H&_nc_oc=Ado02X_h4HfereLUovkn7pykgsvC4KXLcgUPMiS7TbwZpV9NV-5PmG1WGOgvI6wPGPc&_nc_zt=23&_nc_ht=scontent.fdac3-2.fna&_nc_gid=b7N56B9fjE7z2b7Nm94LZw&_nc_ss=7b2a8&oh=00_AQLj0oAMv5Z6YvUQQBc9OhuPo4SfccgL2KP5NzFKSDvw0g&oe=6AA739AE',
     icon:'📊',
     accent:'pink',
     demoUrl:'http://dmoaccsys.netlify.app',
