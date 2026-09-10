@@ -124,7 +124,7 @@ const PRODUCTS = [
       'রিয়েল-টাইম নোটিফিকেশন ও বার্তা আদান-প্রদান',
       'মোবাইলে ইনস্টলযোগ্য (PWA), অফলাইনেও কাজ করে'
     ],
-    status:'live'
+    status:'soon'
   },
   {
     slug:'dokan-hisab',
