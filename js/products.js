@@ -31,13 +31,76 @@
    ========================================================================== */
 
 const CATEGORIES = [
-  { id:'tutoring',     label:'কোচিং/টিউশন' },
+  { id:'education',    label:'কোচিং/টিউশন/বিদ্যালয়' },
   { id:'business',     label:'ব্যবসা/দোকান' },
   { id:'productivity', label:'প্রোডাক্টিভিটি' },
+  { id:'personal',     label:'ব্যক্তিগত' },
   { id:'other',        label:'অন্যান্য' },
 ];
 
 const PRODUCTS = [
+       {
+    slug:'pin-locker',
+    name:'পিন লকার প্রো (PIN Locker Pro)',
+    tagline:'আপনার পাসওয়ার্ড মনে রাখার প্রয়োজন নেই, মনে রাখুন শুধু "পিন লকার প্রো" আর এর পাসওয়ার্ড টি। বাকী সব পাসওয়ার্ড অ্যাপটাতে রাখুন। আর যেকোন সময় পাসওয়ার্ড দেখুন...',
+    description:
+`PinLocker Pro
+আপনার সব পাসওয়ার্ড, এক জায়গায় জমা—সম্পূর্ণ নিরাপদ অনলাইন/অফলাইনে চলা একটি ব্যক্তিগত পাসওয়ার্ড ভল্ট — লক করুন মাস্টার পিন দিয়ে, ক্যাটাগরি সাজিয়ে সংরক্ষণ করুন, চাইলে সিঙ্ক রাখুন ড্রাইভে। নিজের কাছে ব্যাকাপ থাকার মানে হলো সম্পূর্ণ নিরাপদ। 
+সতর্কতা: আমরা আপনার কোন পাসওয়ার্ড সংরক্ষণ করিনা। এপটি এমনভাবেই প্রস্তুত করা হয়েছে। নিজের ডিভাইসে নিজেরমত স্টোরেজ এ ব্যাকাপ রাখার স্বাধীনতা। আপনার ডিভাইস সমূহে আলাদা ভাবে এপটি চালালেও আপনার সেভ করা পাসওয়ার্ড অন্য ডিভাইসে দেখাবেনা। অর্থাৎ আমরা কোন পাসওয়ার্ড সেভ রাখিনা।
+🔐 পিন-সুরক্ষিত ভল্ট 
+☁️ ড্রাইভ সিঙ্ক
+📥 ব্যাকআপ-রিস্টোর
+📱 মোবাইল/ল্যাপটপ/ডেস্কটপ যে কোন যায়গায় ব্যবহারোপযোগি
+:) খুজে নিয়ে আইডি/পাসওয়ার্ড কপি করার সুবিধা
+সোশ্যাল, ব্যাংকিং, ইমেইল বা কাজের— সব একাউন্টের তথ্য একটাই লকড ভল্টে।
+ইনস্টলের পর সম্পূর্ণ অফলাইনে ব্যবহারযোগ্য`,
+    category:'productivity',
+    price:0,
+    priceNote:'** সেটআপ + কাস্টমাইজেশন (চার্জ প্রযোজ্য)',
+    thumbnail:'https://scontent.fdac3-2.fna.fbcdn.net/v/t39.30808-6/801885424_122122625817381104_6613537371839162983_n.jpg?stp=dst-jpg_tt6&cstp=mx2896x1448&ctp=s2896x1448&_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeHfCjYlbUUn5hsjkYMe1uhzsLTFT0x1ZpewtMVPTHVml89Dc6iCRWPytI1FzpzlfLuyWNB8IdSpZCHenNyEfNUf&_nc_ohc=D6nT1lwbuIwQ7kNvwFMsi15&_nc_oc=Adomh2YzmkS51tQ_ZxuZz-0-nn_nAl_u6738RS13jF-YbuofmnIrujZJKJKsKt7A74o&_nc_zt=23&_nc_ht=scontent.fdac3-2.fna&_nc_gid=SZ-TFqpHa_Ry61FZ3TSBYA&_nc_ss=7b2a8&oh=00_AQIAu70mSPj_FGg0J3mIUQETBMFznHMZtiHBbyKdq6paFg&oe=6AA7EFF1',
+    icon:'🗂️',
+    accent:'yellow',
+    demoUrl:'https://pinlocker.netlify.app/',
+    youtubeUrl:'https://youtube.com/shorts/nqDnY_iBd-A?feature=share',
+    features:[
+      'PinLocker Pro',
+      'আপনার সব পাসওয়ার্ড, এক জায়গায় জমা—',
+      'সম্পূর্ণ নিরাপদ অনলাইন/অফলাইনে ব্যক্তিগত পাসওয়ার্ড ভল্ট',
+      'লক করুন মাস্টার পিন দিয়ে',
+      'ক্যাটাগরি সাজিয়ে সংরক্ষণ করুন',
+      '🔐 পিন-সুরক্ষিত ভল্ট',
+      '☁️ ড্রাইভ সিঙ্ক',
+      '📥 ব্যাকআপ-রিস্টোর',
+      '📱 মোবাইল/ল্যাপটপ/ডেস্কটপ যে কোন যায়গায় ব্যবহার',
+      ':) আইডি/পাসওয়ার্ড কপি করার সুবিধা',
+      'সোশ্যাল, ব্যাংকিং, ইমেইল বা কাজের— সব একাউন্টের তথ্য একটাই লকড ভল্টে।',
+      'ইনস্টলের পর সম্পূর্ণ অফলাইনে ব্যবহারযোগ্য'
+    ],
+    status:'live'
+  },
+    {
+    slug:'sas',
+    name:'Self Accounts System',
+    tagline:'এপর্যন্ত বিভিন্ন ভাবে হিসাব রেখেছেন তো, এবার রাখুন, স্বাধীন ভাবে...',
+    description:
+`নিজের মত করে স্বাধীন ভাবে হিসাব রাখুন। নিজের ব্যয় / বাজেট নিজেই করুন। সকল প্র্রকার ডাটা ব্যাকাপ রাখার সু-ব্যবস্থা। এপর্যন্ত অন্যের বিভিন্ন এপ ইউজ করেছেন, কিন্তু কোনকারণে ডিভাইস পরিবর্তন বা অন্য কোন কারনে ঐ এপ আর ইউ করতে পারছেন না, তাদের জন্য এই সেলফ একাউন্টিং সিস্টেম।`,
+    category:'other',
+    price:500,
+    priceNote:'(Promotional offer)',
+    thumbnail:'https://scontent.fdac3-2.fna.fbcdn.net/v/t39.30808-6/787160272_122119801569381104_3653758320177503236_n.jpg?stp=dst-jpg_tt6&cstp=mx1376x768&ctp=s1376x768&_nc_cat=100&ccb=1-7&_nc_sid=127cfc&_nc_eui2=AeGJ2p5SCdXgZGLXCKzeembSmEbzsZxf7ayYRvOxnF_trJ_jir_nrhOUKb2wesRhUgKWFHfE9HRo9ZJliU0_nSaO&_nc_ohc=moNc9oKUebYQ7kNvwGQHG5H&_nc_oc=Ado02X_h4HfereLUovkn7pykgsvC4KXLcgUPMiS7TbwZpV9NV-5PmG1WGOgvI6wPGPc&_nc_zt=23&_nc_ht=scontent.fdac3-2.fna&_nc_gid=b7N56B9fjE7z2b7Nm94LZw&_nc_ss=7b2a8&oh=00_AQLj0oAMv5Z6YvUQQBc9OhuPo4SfccgL2KP5NzFKSDvw0g&oe=6AA739AE',
+    icon:'📊',
+    accent:'pink',
+    demoUrl:'http://dmoaccsys.netlify.app',
+    youtubeUrl:'https://youtu.be/5prskcj4bRA',
+    features:[
+      'মোবাইল/কম্পিউটারে তাৎক্ষণিক এন্ট্রির সুবিধা',
+      'সাপ্তাহিক, মাসিক, বাৎসরিক রিপোর্ট',
+      'একাধিক হিসাব পরিচালনার সুবিধা',
+      'বাজার লিস্ট ও ক্রয়ের চাহিদা ট্র্যাক',
+      'বাজেট অনুসারে ব্যয়ের সুবিধা'
+    ],
+    status:'live'
+  },
   {
     slug:'porar-khata',
     name:'পড়ার খাতা',
@@ -76,18 +139,6 @@ const PRODUCTS = [
     price:0,
     icon:'🧾',
     accent:'teal',
-    features:[],
-    status:'soon'
-  },
-  {
-    slug:'kaj-tracker',
-    name:'কাজ ট্র্যাকার',
-    tagline:'ছোট টিমের জন্য সহজ টাস্ক ও প্রজেক্ট ম্যানেজমেন্ট বোর্ড',
-    description:'কে কোন কাজে আছে, কতদূর হলো — এক নজরে দেখার একটা হালকা-পাতলা টুল। খুব শীঘ্রই আসছে।',
-    category:'productivity',
-    price:0,
-    icon:'🗂️',
-    accent:'yellow',
     features:[],
     status:'soon'
   }
