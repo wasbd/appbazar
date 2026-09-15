@@ -7,7 +7,7 @@
 
 const SITE_CONFIG = {
   siteName: 'অ্যাপবাজার',
-  ownerName: 'Web App Solution (WAS)/ Easy Tech Solution (ETS)',
+  ownerName: 'Web App Solution (WAS)/ Easy Tech Solution, Chattogram (ETS)',
   tagline: 'স্থানীয় ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
   email: 'info.wasbd@gmail.com',
   whatsappNumber: '8801869866899',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
@@ -62,13 +62,13 @@ const SITE_CONFIG = {
            লিংকটা পাবেন তাতে entry.123456789=আপনার-টেস্ট-উত্তর এভাবে
            প্রতিটা প্রশ্নের entry নম্বর দেখা যাবে — সেগুলো নিচে বসান।
   */
-  googleFormUrl: '', // যেমনঃ 'https://docs.google.com/forms/d/e/xxxxxxxxxxxxxxxx/formResponse'
+  googleFormUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfR63v8riPeN0yj2GzvgyR5TrKjVHCBU_177DCT0yMvXKe5Eg/formResponse', // যেমনঃ 'https://docs.google.com/forms/d/e/xxxxxxxxxxxxxxxx/formResponse'
   googleFormFields: {
-    name:   '', // যেমনঃ 'entry.123456789'
-    phone:  '',
-    app:    '',
-    method: '',
-    txn:    '',
+    name:   'entry.1424131309', // যেমনঃ 'entry.123456789'
+    phone:  'entry.1591740007',
+    app:    'entry.1788626843',
+    method: 'entry.297105138',
+    txn:    'entry.260849311',
   },
 };
 
