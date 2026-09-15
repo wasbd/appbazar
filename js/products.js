@@ -33,6 +33,7 @@
 const CATEGORIES = [
   { id:'education',    label:'কোচিং/টিউশন/বিদ্যালয়' },
   { id:'business',     label:'ব্যবসা/দোকান' },
+   { id:'housing',     label:'বাসা/বাড়ী/ইমারত' },
   { id:'productivity', label:'প্রোডাক্টিভিটি' },
   { id:'personal',     label:'ব্যক্তিগত' },
   { id:'other',        label:'অন্যান্য' },
@@ -57,7 +58,7 @@ const PRODUCTS = [
     category:'productivity',
     price:0,
     originalPrice:2000,
-    priceNote:'** শর্ত প্রযোজ্য',
+    priceNote:'Promotional offer. ** শর্ত প্রযোজ্য',
     thumbnail:'https://i.ibb.co.com/Y7qxmgVr/Screenshot-2026-09-15-194742.png',
     icon:'🗂️',
     accent:'yellow',
