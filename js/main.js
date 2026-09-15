@@ -7,22 +7,22 @@
 
 const SITE_CONFIG = {
   siteName: 'অ্যাপবাজার',
-  ownerName: 'আপনার নাম / প্রতিষ্ঠানের নাম',
+  ownerName: 'Web App Solution (WAS)/ Easy Tech Solution (ETS)',
   tagline: 'স্থানীয় ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
-  email: 'you@example.com',
-  whatsappNumber: '8801XXXXXXXXX',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
-  messengerUsername: '',             // আপনার Facebook Page-এর ইউজারনেম, যেমনঃ 'apps.bazaar'
+  email: 'info.wasbd@gmail.com',
+  whatsappNumber: '8801869866899',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
+  messengerUsername: 'etsctg',             // আপনার Facebook Page-এর ইউজারনেম, যেমনঃ 'apps.bazaar'
                                       // (আপনার পেজের লিংক facebook.com/apps.bazaar হলে
                                       // এখানে শুধু 'apps.bazaar' বসান) — খালি রাখলে
                                       // "কিনুন" মডালে মেসেঞ্জার অপশন দেখাবে না।
                                       // ⚠️ এটা একটা Facebook PAGE-এর ইউজারনেম হতে হবে,
                                       // ব্যক্তিগত প্রোফাইল দিয়ে কাজ করে না।
-  bkashNumber: '01XXXXXXXXX',
+  bkashNumber: '01740541388',
   nagadNumber: '01XXXXXXXXX',
-  facebook: '#',
+  facebook: 'https://www.facebook.com/etsctg',
   socialLinks: [
-    { label:'Facebook', icon:'f', url:'#' },
-    { label:'YouTube',  icon:'▶', url:'#' },
+    { label:'Facebook', icon:'f', url:'https://www.facebook.com/etsctg' },
+    { label:'YouTube',  icon:'▶', url:'https://www.youtube.com/etsctg' },
   ],
 
   /* ------------------------------------------------------------------
