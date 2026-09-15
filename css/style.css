@@ -187,6 +187,7 @@ section{ padding:86px 0; position:relative; }
   color:#fff;
 }
 .app-thumb .thumb-tag{ position:absolute; top:12px; right:12px; }
+.app-thumb .discount-badge{ position:absolute; top:12px; left:12px; }
 .app-thumb.has-image{ background-color:var(--bg-alt); }
 .app-body{ padding:22px; display:flex; flex-direction:column; gap:10px; flex:1; }
 .app-body h3{ font-size:1.25rem; margin-bottom:0; }
@@ -194,6 +195,7 @@ section{ padding:86px 0; position:relative; }
 .app-meta-row{ display:flex; align-items:center; justify-content:space-between; margin-top:auto; padding-top:14px; }
 .app-price{ font-family:var(--font-display); font-weight:700; font-size:1.2rem; color:var(--ink); }
 .app-price small{ font-family:var(--font-body); font-weight:400; font-size:.72rem; color:var(--ink-soft); }
+.price-was{ font-family:var(--font-body); font-weight:600; font-size:.8rem; color:#a8a2c0; text-decoration:line-through; margin-top:2px; }
 .app-actions{ display:flex; gap:10px; }
 .category-strip{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:36px; }
 .category-chip{
@@ -239,6 +241,7 @@ section{ padding:86px 0; position:relative; }
 .price-box{ background:var(--card); border:2px solid var(--border); border-radius:var(--radius); padding:26px; margin-top:22px; }
 .price-box .price-big{ font-family:var(--font-display); font-size:2.1rem; font-weight:700; }
 .price-box .price-big small{ font-family:var(--font-body); font-size:.85rem; font-weight:400; color:var(--ink-soft); }
+.price-box .price-big .price-was{ font-size:1rem; margin-top:4px; }
 .detail-actions{ display:flex; gap:12px; margin-top:16px; flex-wrap:wrap; }
 .detail-body{ margin-top:70px; display:grid; grid-template-columns:2fr 1fr; gap:50px; }
 .detail-body h2{ font-size:1.5rem; }

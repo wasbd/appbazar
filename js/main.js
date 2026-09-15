@@ -7,16 +7,22 @@
 
 const SITE_CONFIG = {
   siteName: 'অ্যাপবাজার',
-  ownerName: 'Web App Solution (WAS)/ Easy Tech Solution (ETS)',
-  tagline: 'স্থানীয় শিক্ষা, ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
-  email: 'info.wasbd@gmail.com',
-  whatsappNumber: '8801869866899',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
-  bkashNumber: '01740541388',
-  nagadNumber: '01740541388',
-  facebook: 'https://www.facebook.com/etsctg',
+  ownerName: 'আপনার নাম / প্রতিষ্ঠানের নাম',
+  tagline: 'স্থানীয় ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
+  email: 'you@example.com',
+  whatsappNumber: '8801XXXXXXXXX',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
+  messengerUsername: '',             // আপনার Facebook Page-এর ইউজারনেম, যেমনঃ 'apps.bazaar'
+                                      // (আপনার পেজের লিংক facebook.com/apps.bazaar হলে
+                                      // এখানে শুধু 'apps.bazaar' বসান) — খালি রাখলে
+                                      // "কিনুন" মডালে মেসেঞ্জার অপশন দেখাবে না।
+                                      // ⚠️ এটা একটা Facebook PAGE-এর ইউজারনেম হতে হবে,
+                                      // ব্যক্তিগত প্রোফাইল দিয়ে কাজ করে না।
+  bkashNumber: '01XXXXXXXXX',
+  nagadNumber: '01XXXXXXXXX',
+  facebook: '#',
   socialLinks: [
-    { label:'Facebook', icon:'f', url:'https://www.facebook.com/etsctg' },
-    { label:'YouTube',  icon:'▶', url:'https://www.youtube.com/@wasctg' },
+    { label:'Facebook', icon:'f', url:'#' },
+    { label:'YouTube',  icon:'▶', url:'#' },
   ],
 
   /* ------------------------------------------------------------------
@@ -70,6 +76,20 @@ const SITE_CONFIG = {
 const $  = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => Array.from(root.querySelectorAll(sel));
 function fmtTaka(n){ return n===0 ? 'ফ্রি' : `৳${Number(n).toLocaleString('bn-BD')}`; }
+/* originalPrice দেওয়া থাকলে ও price-এর চেয়ে বেশি হলে ছাড়ের শতাংশ বের করে, নাহলে null */
+function discountPercent(p){
+  if(!p.originalPrice || p.originalPrice<=p.price) return null;
+  return Math.round((1 - p.price/p.originalPrice)*100);
+}
+function priceRowHtml(p, big){
+  const disc = discountPercent(p);
+  const nowCls = big ? 'price-big' : 'app-price';
+  return `
+    <div class="${nowCls}">
+      ${fmtTaka(p.price)} ${p.priceNote?`<small>${p.priceNote}</small>`:''}
+      ${disc!==null ? `<div class="price-was">${fmtTaka(p.originalPrice)}</div>` : ''}
+    </div>`;
+}
 function getParam(name){ return new URLSearchParams(window.location.search).get(name); }
 
 function toast(msg){
@@ -134,6 +154,9 @@ function paintChrome(activePage){
 function waLink(text){
   return `https://wa.me/${SITE_CONFIG.whatsappNumber}?text=${encodeURIComponent(text)}`;
 }
+function messengerLink(text){
+  return `https://m.me/${SITE_CONFIG.messengerUsername}?text=${encodeURIComponent(text)}`;
+}
 
 /* ---------- অ্যাপ কার্ড / থাম্বনেইল রেন্ডার ---------- */
 const ACCENT_GRADIENTS = {
@@ -171,13 +194,14 @@ function appCardHtml(p){
   <div class="app-card ${soon?'soon':''}">
     <a href="app.html?slug=${p.slug}" class="app-thumb ${p.thumbnail?'has-image':''}" style="${thumbStyle(p)}">
       ${p.thumbnail? '' : (p.icon||'📦')}
+      ${!soon && discountPercent(p)!==null ? `<span class="tag pink discount-badge">${discountPercent(p)}% ছাড়</span>` : ''}
       <span class="tag ${soon?'soon':p.accent} thumb-tag">${soon? 'শীঘ্রই আসছে' : (CATEGORIES.find(c=>c.id===p.category)||{}).label||''}</span>
     </a>
     <div class="app-body">
       <h3><a href="app.html?slug=${p.slug}">${p.name}</a></h3>
       <p class="app-tagline">${p.tagline}</p>
       <div class="app-meta-row">
-        <div class="app-price">${soon? '—' : fmtTaka(p.price)} ${(!soon && p.priceNote)? `<small>${p.priceNote}</small>`:''}</div>
+        ${soon ? `<div class="app-price">—</div>` : priceRowHtml(p, false)}
         <div class="app-actions">
           ${soon
             ? `<span class="tag soon">প্রিভিউ</span>`
@@ -260,7 +284,7 @@ function initDetailPage(){
         <div class="price-box">
           ${soon
             ? `<p style="margin:0">এই অ্যাপটা এখনো তৈরি হচ্ছে — মুক্তি পেলে সবার আগে জানতে যোগাযোগ করে রাখতে পারেন।</p>`
-            : `<div class="price-big">${fmtTaka(p.price)} ${p.priceNote?`<small>${p.priceNote}</small>`:''}</div>`}
+            : priceRowHtml(p, true)}
           <div class="detail-actions">
             ${soon
               ? `<a class="btn btn-dark btn-block" href="${waLink('আসসালামু আলাইকুম, \"'+p.name+'\" অ্যাপটা মুক্তি পেলে আমাকে জানাবেন।')}" target="_blank" rel="noopener">🔔 মুক্তি পেলে জানাতে বলুন</a>`
@@ -298,6 +322,7 @@ function initDetailPage(){
 /* ---------- "কিনুন" মডাল ---------- */
 function ensureModal(){
   if($('#buy-modal')) return;
+  const hasMessenger = !!SITE_CONFIG.messengerUsername;
   const el = document.createElement('div');
   el.id = 'buy-modal';
   el.className = 'modal-overlay';
@@ -307,7 +332,8 @@ function ensureModal(){
       <h3 id="buy-modal-title">কিনুন</h3>
       <p class="modal-app-name" id="buy-modal-appname"></p>
       <div class="buy-tabs">
-        <button class="buy-tab active" data-tab="whatsapp">💬 WhatsApp-এ অর্ডার</button>
+        <button class="buy-tab active" data-tab="whatsapp">💬 WhatsApp</button>
+        ${hasMessenger ? `<button class="buy-tab" data-tab="messenger">📩 মেসেঞ্জার</button>` : ''}
         <button class="buy-tab" data-tab="manual">💳 bKash/Nagad</button>
       </div>
       <div class="pay-panel active" data-panel="whatsapp">
@@ -318,6 +344,16 @@ function ensureModal(){
           <button class="btn btn-teal btn-block" type="submit">💬 WhatsApp-এ পাঠান</button>
         </form>
       </div>
+      ${hasMessenger ? `
+      <div class="pay-panel" data-panel="messenger">
+        <div class="wa-preview" id="msg-preview-text"></div>
+        <form id="messenger-order-form">
+          <div class="form-field"><label>আপনার নাম</label><input type="text" name="name" required /></div>
+          <div class="form-field"><label>মোবাইল নম্বর (ঐচ্ছিক)</label><input type="tel" name="phone" /></div>
+          <button class="btn btn-dark btn-block" type="submit">📩 মেসেঞ্জারে পাঠান</button>
+        </form>
+        <p class="pay-note">মেসেঞ্জার খুলে গেলে বার্তাটা আগে থেকেই লেখা থাকবে — শুধু Send চাপুন। কোনো কারণে লেখা না এলে, নিজে থেকে অ্যাপের নাম উল্লেখ করে একটা মেসেজ পাঠিয়ে দিন।</p>
+      </div>` : ''}
       <div class="pay-panel" data-panel="manual">
         <div class="pay-number-box">
           <div><span class="method">bKash (Personal/Send Money)</span><b id="bkash-number-text"></b></div>
@@ -369,6 +405,19 @@ function ensureModal(){
     e.target.reset();
     closeBuyModal();
   });
+  $('#messenger-order-form')?.addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const name = f.get('name'), phone = f.get('phone')||'';
+    const appName = $('#buy-modal-appname').dataset.appName || '';
+    const appPrice = $('#buy-modal-appname').dataset.appPrice || '';
+    const msg = `আসসালামু আলাইকুম, আমি "${appName}" অ্যাপটা (${appPrice}) কিনতে চাই।\nনাম: ${name}${phone?`\nমোবাইল: ${phone}`:''}`;
+    submitOrderBackup({ name, phone, app: appName, method:'Messenger', txn:'' });
+    window.open(messengerLink(msg), '_blank');
+    toast('মেসেঞ্জার খুলে যাচ্ছে — বার্তাটা পাঠাতে ভুলবেন না! ✅');
+    e.target.reset();
+    closeBuyModal();
+  });
   $('#manual-order-form').addEventListener('submit', (e)=>{
     e.preventDefault();
     const f = new FormData(e.target);
@@ -390,6 +439,8 @@ function openBuyModal(product){
   $('#bkash-number-text').textContent = SITE_CONFIG.bkashNumber;
   $('#nagad-number-text').textContent = SITE_CONFIG.nagadNumber;
   $('#wa-preview-text').textContent = `আপনি কিনছেন: ${product.name} — ${fmtTaka(product.price)}`;
+  const msgPreview = $('#msg-preview-text');
+  if(msgPreview) msgPreview.textContent = `আপনি কিনছেন: ${product.name} — ${fmtTaka(product.price)}`;
   $('#buy-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }

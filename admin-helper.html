@@ -95,6 +95,11 @@
           <input type="number" name="price" id="f-price" min="0" required />
         </div>
         <div class="form-field">
+          <label>পূর্বের/নিয়মিত দাম (ঐচ্ছিক — অফার থাকলে দিন)</label>
+          <input type="number" name="originalPrice" id="f-originalPrice" min="0" placeholder="যেমনঃ 3500" />
+          <div class="preview-note">উপরের দামের চেয়ে বেশি হলে এটা কাটা-দাগসহ ধূসর রঙে দেখাবে + ছাড়ের ব্যাজ। খালি রাখলে কিছু দেখাবে না।</div>
+        </div>
+        <div class="form-field">
           <label>দামের পাশের ছোট নোট (ঐচ্ছিক)</label>
           <input type="text" name="priceNote" id="f-priceNote" placeholder="যেমনঃ সেটআপ + কাস্টমাইজেশন" />
         </div>
@@ -225,6 +230,7 @@ function fillForm(p){
   document.getElementById('f-description').value = p.description;
   document.getElementById('f-category').value = p.category;
   document.getElementById('f-price').value = p.price;
+  document.getElementById('f-originalPrice').value = p.originalPrice||'';
   document.getElementById('f-priceNote').value = p.priceNote||'';
   document.getElementById('f-thumbnail').value = p.thumbnail||'';
   document.getElementById('f-icon').value = p.icon||'';
@@ -250,6 +256,7 @@ function collect(){
     description: document.getElementById('f-description').value.trim(),
     category: document.getElementById('f-category').value,
     price: Number(document.getElementById('f-price').value)||0,
+    originalPrice: Number(document.getElementById('f-originalPrice').value)||0,
     priceNote: document.getElementById('f-priceNote').value.trim(),
     thumbnail: document.getElementById('f-thumbnail').value.trim(),
     icon: document.getElementById('f-icon').value.trim() || '📦',
@@ -271,6 +278,7 @@ function buildSnippet(d){
   lines.push('`' + esc(d.description) + '`,');
   lines.push(`    category:'${d.category}',`);
   lines.push(`    price:${d.price},`);
+  if(d.originalPrice) lines.push(`    originalPrice:${d.originalPrice},`);
   if(d.priceNote) lines.push(`    priceNote:'${escSingle(d.priceNote)}',`);
   if(d.thumbnail) lines.push(`    thumbnail:'${escSingle(d.thumbnail)}',`);
   lines.push(`    icon:'${d.icon}',`);
@@ -298,22 +306,30 @@ function accentGradient(a){
   }[a] || 'linear-gradient(135deg, #FF3E70, #FF9AAE)';
 }
 function fmtTakaLocal(n){ return n===0 ? 'ফ্রি' : `৳${Number(n).toLocaleString('bn-BD')}`; }
+function discountPercentLocal(d){
+  if(!d.originalPrice || d.originalPrice<=d.price) return null;
+  return Math.round((1 - d.price/d.originalPrice)*100);
+}
 
 function generate(){
   const d = collect();
   document.getElementById('code-output').textContent = (d.slug && d.name) ? buildSnippet(d) : 'অন্তত নাম ও slug দিন...';
   const catLabel = (CATEGORIES.find(c=>c.id===d.category)||{}).label || '';
+  const disc = discountPercentLocal(d);
   document.getElementById('live-preview').innerHTML = `
     <div class="app-card">
       <div class="app-thumb ${d.thumbnail?'has-image':''}" style="${d.thumbnail?`background-image:url('${d.thumbnail}'); background-size:cover; background-position:center;`:`background:${accentGradient(d.accent)}`}">
         ${d.thumbnail? '' : (d.icon||'📦')}
+        ${d.status!=='soon' && disc!==null ? `<span class="tag pink discount-badge">${disc}% ছাড়</span>` : ''}
         <span class="tag ${d.status==='soon'?'soon':d.accent} thumb-tag">${d.status==='soon'?'শীঘ্রই আসছে':catLabel}</span>
       </div>
       <div class="app-body">
         <h3>${d.name||'অ্যাপের নাম'}</h3>
         <p class="app-tagline">${d.tagline||'এখানে ট্যাগলাইন দেখাবে'}</p>
         <div class="app-meta-row">
-          <div class="app-price">${d.status==='soon'?'—':fmtTakaLocal(d.price)} ${(d.status!=='soon' && d.priceNote)?`<small>${d.priceNote}</small>`:''}</div>
+          <div class="app-price">${d.status==='soon'?'—':fmtTakaLocal(d.price)} ${(d.status!=='soon' && d.priceNote)?`<small>${d.priceNote}</small>`:''}
+            ${(d.status!=='soon' && disc!==null) ? `<div class="price-was">${fmtTakaLocal(d.originalPrice)}</div>` : ''}
+          </div>
           <div class="app-actions"><span class="tag ${d.accent}">দেখুন</span></div>
         </div>
       </div>
