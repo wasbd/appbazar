@@ -40,7 +40,7 @@ const CATEGORIES = [
 ];
 
 const PRODUCTS = [
-  {
+    {
     slug:'pin-locker',
     name:'পিন লকার প্রো (PIN Locker Pro)',
     tagline:'আপনার পাসওয়ার্ড মনে রাখার প্রয়োজন নেই, মনে রাখুন শুধু "পিন লকার প্রো" আর এর পাসওয়ার্ড টি। বাকী সব পাসওয়ার্ড অ্যাপটাতে রাখুন। আর যেকোন সময় পাসওয়ার্ড দেখুন...',
@@ -56,13 +56,13 @@ const PRODUCTS = [
 সোশ্যাল, ব্যাংকিং, ইমেইল বা কাজের— সব একাউন্টের তথ্য একটাই লকড ভল্টে।
 🌟ইনস্টলের পর সম্পূর্ণ অফলাইনে ব্যবহারযোগ্য।`,
     category:'productivity',
-    price:0,
+    price:299,
     originalPrice:2000,
     priceNote:'Promotional offer. ** শর্ত প্রযোজ্য',
     thumbnail:'https://i.ibb.co.com/Y7qxmgVr/Screenshot-2026-09-15-194742.png',
     icon:'🗂️',
     accent:'yellow',
-    demoUrl:'https://pinlocker.netlify.app/',
+    demoUrl:'https://pldmo.netlify.app/',
     youtubeUrl:'https://youtube.com/shorts/nqDnY_iBd-A?feature=share',
     features:[
       'PinLocker Pro',
