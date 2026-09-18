@@ -81,13 +81,25 @@ function discountPercent(p){
   if(!p.originalPrice || p.originalPrice<=p.price) return null;
   return Math.round((1 - p.price/p.originalPrice)*100);
 }
+/* billing অনুযায়ী দামের পাশে যে ছোট লেজুড় বসবে — যেমন ৳৫০০/মাস */
+const BILLING_SUFFIX = { monthly:'/মাস', yearly:'/বছর', onetime:'' };
+function billingSuffix(p){ return BILLING_SUFFIX[p.billing] || ''; }
+/* installment দেওয়া থাকলে "৩ কিস্তিতে ৳১০০০ করে" ধরনের লাইন বানায় */
+function installmentText(p){
+  const ins = p.installment;
+  if(!ins || !ins.count || !ins.amount) return null;
+  const count = Number(ins.count).toLocaleString('bn-BD');
+  return `অথবা ${count} কিস্তিতে ${fmtTaka(ins.amount)} করে`;
+}
 function priceRowHtml(p, big){
   const disc = discountPercent(p);
   const nowCls = big ? 'price-big' : 'app-price';
+  const ins = installmentText(p);
   return `
     <div class="${nowCls}">
-      ${fmtTaka(p.price)} ${p.priceNote?`<small>${p.priceNote}</small>`:''}
-      ${disc!==null ? `<div class="price-was">${fmtTaka(p.originalPrice)}</div>` : ''}
+      ${fmtTaka(p.price)}<span class="price-suffix">${billingSuffix(p)}</span> ${p.priceNote?`<small>${p.priceNote}</small>`:''}
+      ${disc!==null ? `<div class="price-was">${fmtTaka(p.originalPrice)}${billingSuffix(p)}</div>` : ''}
+      ${ins ? `<div class="price-installment">🗓️ ${ins}</div>` : ''}
     </div>`;
 }
 function getParam(name){ return new URLSearchParams(window.location.search).get(name); }
@@ -219,10 +231,61 @@ function renderGrid(container, list){
 }
 
 /* ---------- হোমপেজ: ফিচারড অ্যাপ ---------- */
+/* Fisher-Yates শাফল — মূল PRODUCTS অ্যারে অক্ষত রেখে একটা এলোমেলো কপি ফেরত দেয়,
+   যাতে হোমপেজে প্রতিবার ভিন্ন অ্যাপ আগে দেখা যায় (সব অ্যাপই সমান সুযোগ পায়) */
+function shuffled(arr){
+  const a = arr.slice();
+  for(let i=a.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
 function initHomeApps(){
-  const grid = $('#featured-apps-grid');
-  if(!grid) return;
-  renderGrid(grid, PRODUCTS.slice(0,3));
+  const track = $('#featured-apps-track');
+  if(!track) return;
+  const list = shuffled(PRODUCTS);
+  track.innerHTML = list.map(p=>`<div class="carousel-item">${appCardHtml(p)}</div>`).join('');
+
+  const prev = $('#featured-prev'), next = $('#featured-next'), dotsWrap = $('#featured-dots');
+
+  /* এক "পেজ" = ট্র্যাকের দৃশ্যমান প্রস্থ (ডেস্কটপে ৩টা কার্ড, ট্যাবে ২টা, মোবাইলে ১টা —
+     CSS-ই ঠিক করে দেয়, তাই এখানে হার্ডকোড করা লাগে না) */
+  const pageCount = ()=> Math.max(1, Math.ceil(track.scrollWidth / track.clientWidth));
+  const currentPage = ()=> Math.round(track.scrollLeft / track.clientWidth);
+
+  function renderDots(){
+    if(!dotsWrap) return;
+    const total = pageCount();
+    if(total<=1){ dotsWrap.innerHTML=''; return; }
+    const cur = currentPage();
+    dotsWrap.innerHTML = Array.from({length:total}, (_,i)=>
+      `<button class="carousel-dot ${i===cur?'active':''}" data-page="${i}" aria-label="পেজ ${i+1}"></button>`).join('');
+  }
+  function updateArrows(){
+    if(!prev || !next) return;
+    const maxScroll = track.scrollWidth - track.clientWidth - 2; // ২px সহনশীলতা
+    prev.disabled = track.scrollLeft <= 2;
+    next.disabled = track.scrollLeft >= maxScroll;
+  }
+  function scrollByPage(dir){
+    track.scrollBy({ left: dir * track.clientWidth, behavior:'smooth' });
+  }
+
+  prev?.addEventListener('click', ()=> scrollByPage(-1));
+  next?.addEventListener('click', ()=> scrollByPage(1));
+  dotsWrap?.addEventListener('click', (e)=>{
+    const dot = e.target.closest('.carousel-dot'); if(!dot) return;
+    track.scrollTo({ left: Number(dot.dataset.page) * track.clientWidth, behavior:'smooth' });
+  });
+  track.addEventListener('scroll', ()=>{
+    clearTimeout(track._t);
+    track._t = setTimeout(()=>{ renderDots(); updateArrows(); }, 90);
+  });
+  window.addEventListener('resize', ()=>{ renderDots(); updateArrows(); });
+
+  renderDots(); updateArrows();
 }
 
 /* ---------- ক্যাটালগ পেজ: সার্চ + ক্যাটাগরি ফিল্টার ---------- */
@@ -433,14 +496,19 @@ function ensureModal(){
 }
 function openBuyModal(product){
   ensureModal();
-  $('#buy-modal-appname').textContent = product.name + ' — ' + fmtTaka(product.price) + (product.priceNote?' ('+product.priceNote+')':'');
+  // দাম + billing লেজুড় (যেমন ৳৫০০/মাস) — কিস্তির তথ্য থাকলে সেটাও বার্তায় যোগ হয়,
+  // যাতে অর্ডারের মেসেজ দেখেই বোঝা যায় কোন প্যাকেজে কিনতে চাইছে
+  const priceText = fmtTaka(product.price) + billingSuffix(product);
+  const ins = installmentText(product);
+  $('#buy-modal-appname').textContent = product.name + ' — ' + priceText + (product.priceNote?' ('+product.priceNote+')':'') + (ins? ' · '+ins : '');
   $('#buy-modal-appname').dataset.appName = product.name;
-  $('#buy-modal-appname').dataset.appPrice = fmtTaka(product.price);
+  $('#buy-modal-appname').dataset.appPrice = priceText + (ins? ' ('+ins+')' : '');
   $('#bkash-number-text').textContent = SITE_CONFIG.bkashNumber;
   $('#nagad-number-text').textContent = SITE_CONFIG.nagadNumber;
-  $('#wa-preview-text').textContent = `আপনি কিনছেন: ${product.name} — ${fmtTaka(product.price)}`;
+  const previewText = `আপনি কিনছেন: ${product.name} — ${priceText}${ins? '\n'+ins : ''}`;
+  $('#wa-preview-text').textContent = previewText;
   const msgPreview = $('#msg-preview-text');
-  if(msgPreview) msgPreview.textContent = `আপনি কিনছেন: ${product.name} — ${fmtTaka(product.price)}`;
+  if(msgPreview) msgPreview.textContent = previewText;
   $('#buy-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
