@@ -196,6 +196,43 @@ section{ padding:86px 0; position:relative; }
 .app-price{ font-family:var(--font-display); font-weight:700; font-size:1.2rem; color:var(--ink); }
 .app-price small{ font-family:var(--font-body); font-weight:400; font-size:.72rem; color:var(--ink-soft); }
 .price-was{ font-family:var(--font-body); font-weight:600; font-size:.8rem; color:#a8a2c0; text-decoration:line-through; margin-top:2px; }
+/* মাসিক/বাৎসরিক লেজুড় (৳৫০০/মাস) — দামের চেয়ে ছোট ও হালকা, যাতে মূল দামই চোখে পড়ে */
+.price-suffix{ font-family:var(--font-body); font-weight:600; font-size:.62em; color:var(--ink-soft); }
+.price-installment{ font-family:var(--font-body); font-weight:600; font-size:.76rem; color:var(--teal-dark); background:#DBF6EC; display:inline-block; padding:3px 10px; border-radius:20px; margin-top:6px; }
+
+/* ---------- ক্যারাউসেল (হোমপেজের ফিচারড অ্যাপ স্লাইডার) ---------- */
+.carousel{ position:relative; }
+.carousel-track{
+  display:flex; gap:26px; overflow-x:auto; scroll-snap-type:x mandatory; scroll-behavior:smooth;
+  padding:4px; margin:-4px; scrollbar-width:none;
+}
+.carousel-track::-webkit-scrollbar{ display:none; }
+.carousel-item{ flex:0 0 calc((100% - 52px) / 3); scroll-snap-align:start; display:flex; }
+.carousel-item .app-card{ width:100%; }
+.carousel-arrow{
+  position:absolute; top:calc(85px - 22px); width:44px; height:44px; border-radius:50%; z-index:5;
+  background:#fff; border:2px solid var(--border); box-shadow:var(--shadow-md); font-size:1.5rem; line-height:1;
+  color:var(--ink); display:flex; align-items:center; justify-content:center; transition:opacity .2s, transform .15s;
+}
+.carousel-arrow:hover:not(:disabled){ transform:scale(1.08); border-color:var(--pink); color:var(--pink); }
+.carousel-arrow:disabled{ opacity:.3; cursor:default; }
+.carousel-arrow.prev{ left:-18px; }
+.carousel-arrow.next{ right:-18px; }
+.carousel-dots{ display:flex; justify-content:center; gap:8px; margin-top:22px; }
+.carousel-dot{
+  width:9px; height:9px; border-radius:50%; border:none; background:var(--border); padding:0;
+  transition:background .2s, width .2s;
+}
+.carousel-dot.active{ background:var(--pink); width:26px; border-radius:20px; }
+@media (max-width:980px){
+  .carousel-item{ flex-basis:calc((100% - 26px) / 2); }
+  .carousel-arrow.prev{ left:-6px; }
+  .carousel-arrow.next{ right:-6px; }
+}
+@media (max-width:680px){
+  .carousel-item{ flex-basis:100%; }
+  .carousel-arrow{ display:none; }  /* মোবাইলে আঙুল দিয়ে সোয়াইপ করাই স্বাভাবিক */
+}
 .app-actions{ display:flex; gap:10px; }
 .category-strip{ display:flex; gap:10px; flex-wrap:wrap; margin-bottom:36px; }
 .category-chip{
