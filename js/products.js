@@ -137,15 +137,18 @@ const PRODUCTS = [
     status:'soon'
   },
   {
-    slug:'dokan-hisab',
-    name:'দোকান হিসাব',
-    tagline:'ছোট দোকান ও ব্যবসার দৈনিক বিক্রি-খরচ-বাকি হিসাব রাখার অ্যাপ',
-    description:'দৈনিক বিক্রি, ক্রয়, বাকি আদায়-প্রদান আর মাস শেষে লাভ-ক্ষতির হিসাব — সহজ ভাষায়, খাতার মতোই সহজ ইন্টারফেসে। এই অ্যাপটি এখন তৈরি হচ্ছে।',
-    category:'business',
-    price:0,
+    slug:'kgs',
+    name:'KG School Management',
+    tagline:'কিন্ডারগার্টেন স্কুল বা বেসরকারি প্রাইমারি স্কুল ম্যানেজমেন্ট এপ',
+    description:
+`একটি কিন্ডারগার্টেন স্কুলের সকল প্রকার কার্যাদি নির্বাহ করার প্রয়াসে এপটি আপনার জন্য সহায়ক ভূমিকা রাখবে।`,
+    category:'education',
+    price:1,
+    priceNote:'৭৯৯/মাস',
+    thumbnail:'https://i.ibb.co.com/k2gS6r0f/Screenshot-2026-09-18-125601.png',
     icon:'🧾',
-    accent:'teal',
+    accent:'violet',
     features:[],
-    status:'soon'
+    status:'live'
   }
 ];
