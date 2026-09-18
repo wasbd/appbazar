@@ -7,22 +7,22 @@
 
 const SITE_CONFIG = {
   siteName: 'অ্যাপবাজার',
-  ownerName: 'আপনার নাম / প্রতিষ্ঠানের নাম',
+  ownerName: 'Web App Solution (WAS)/ Easy Tech Solution, Chattogram (ETS)',
   tagline: 'স্থানীয় ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
-  email: 'you@example.com',
-  whatsappNumber: '8801XXXXXXXXX',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
-  messengerUsername: '',             // আপনার Facebook Page-এর ইউজারনেম, যেমনঃ 'apps.bazaar'
+  email: 'info.wasbd@gmail.com',
+  whatsappNumber: '8801869866899',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
+  messengerUsername: 'etsctg',             // আপনার Facebook Page-এর ইউজারনেম, যেমনঃ 'apps.bazaar'
                                       // (আপনার পেজের লিংক facebook.com/apps.bazaar হলে
                                       // এখানে শুধু 'apps.bazaar' বসান) — খালি রাখলে
                                       // "কিনুন" মডালে মেসেঞ্জার অপশন দেখাবে না।
                                       // ⚠️ এটা একটা Facebook PAGE-এর ইউজারনেম হতে হবে,
                                       // ব্যক্তিগত প্রোফাইল দিয়ে কাজ করে না।
-  bkashNumber: '01XXXXXXXXX',
+  bkashNumber: '01740541388',
   nagadNumber: '01XXXXXXXXX',
-  facebook: '#',
+  facebook: 'https://www.facebook.com/etsctg',
   socialLinks: [
-    { label:'Facebook', icon:'f', url:'#' },
-    { label:'YouTube',  icon:'▶', url:'#' },
+    { label:'Facebook', icon:'f', url:'https://www.facebook.com/etsctg' },
+    { label:'YouTube',  icon:'▶', url:'https://www.youtube.com/etsctg' },
   ],
 
   /* ------------------------------------------------------------------
@@ -62,13 +62,13 @@ const SITE_CONFIG = {
            লিংকটা পাবেন তাতে entry.123456789=আপনার-টেস্ট-উত্তর এভাবে
            প্রতিটা প্রশ্নের entry নম্বর দেখা যাবে — সেগুলো নিচে বসান।
   */
-  googleFormUrl: '', // যেমনঃ 'https://docs.google.com/forms/d/e/xxxxxxxxxxxxxxxx/formResponse'
+  googleFormUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfR63v8riPeN0yj2GzvgyR5TrKjVHCBU_177DCT0yMvXKe5Eg/formResponse', // যেমনঃ 'https://docs.google.com/forms/d/e/xxxxxxxxxxxxxxxx/formResponse'
   googleFormFields: {
-    name:   '', // যেমনঃ 'entry.123456789'
-    phone:  '',
-    app:    '',
-    method: '',
-    txn:    '',
+    name:   'entry.1424131309', // যেমনঃ 'entry.123456789'
+    phone:  'entry.1591740007',
+    app:    'entry.1788626843',
+    method: 'entry.297105138',
+    txn:    'entry.260849311',
   },
 };
 
@@ -81,25 +81,13 @@ function discountPercent(p){
   if(!p.originalPrice || p.originalPrice<=p.price) return null;
   return Math.round((1 - p.price/p.originalPrice)*100);
 }
-/* billing অনুযায়ী দামের পাশে যে ছোট লেজুড় বসবে — যেমন ৳৫০০/মাস */
-const BILLING_SUFFIX = { monthly:'/মাস', yearly:'/বছর', onetime:'' };
-function billingSuffix(p){ return BILLING_SUFFIX[p.billing] || ''; }
-/* installment দেওয়া থাকলে "৩ কিস্তিতে ৳১০০০ করে" ধরনের লাইন বানায় */
-function installmentText(p){
-  const ins = p.installment;
-  if(!ins || !ins.count || !ins.amount) return null;
-  const count = Number(ins.count).toLocaleString('bn-BD');
-  return `অথবা ${count} কিস্তিতে ${fmtTaka(ins.amount)} করে`;
-}
 function priceRowHtml(p, big){
   const disc = discountPercent(p);
   const nowCls = big ? 'price-big' : 'app-price';
-  const ins = installmentText(p);
   return `
     <div class="${nowCls}">
-      ${fmtTaka(p.price)}<span class="price-suffix">${billingSuffix(p)}</span> ${p.priceNote?`<small>${p.priceNote}</small>`:''}
-      ${disc!==null ? `<div class="price-was">${fmtTaka(p.originalPrice)}${billingSuffix(p)}</div>` : ''}
-      ${ins ? `<div class="price-installment">🗓️ ${ins}</div>` : ''}
+      ${fmtTaka(p.price)} ${p.priceNote?`<small>${p.priceNote}</small>`:''}
+      ${disc!==null ? `<div class="price-was">${fmtTaka(p.originalPrice)}</div>` : ''}
     </div>`;
 }
 function getParam(name){ return new URLSearchParams(window.location.search).get(name); }
@@ -231,61 +219,10 @@ function renderGrid(container, list){
 }
 
 /* ---------- হোমপেজ: ফিচারড অ্যাপ ---------- */
-/* Fisher-Yates শাফল — মূল PRODUCTS অ্যারে অক্ষত রেখে একটা এলোমেলো কপি ফেরত দেয়,
-   যাতে হোমপেজে প্রতিবার ভিন্ন অ্যাপ আগে দেখা যায় (সব অ্যাপই সমান সুযোগ পায়) */
-function shuffled(arr){
-  const a = arr.slice();
-  for(let i=a.length-1; i>0; i--){
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-}
-
 function initHomeApps(){
-  const track = $('#featured-apps-track');
-  if(!track) return;
-  const list = shuffled(PRODUCTS);
-  track.innerHTML = list.map(p=>`<div class="carousel-item">${appCardHtml(p)}</div>`).join('');
-
-  const prev = $('#featured-prev'), next = $('#featured-next'), dotsWrap = $('#featured-dots');
-
-  /* এক "পেজ" = ট্র্যাকের দৃশ্যমান প্রস্থ (ডেস্কটপে ৩টা কার্ড, ট্যাবে ২টা, মোবাইলে ১টা —
-     CSS-ই ঠিক করে দেয়, তাই এখানে হার্ডকোড করা লাগে না) */
-  const pageCount = ()=> Math.max(1, Math.ceil(track.scrollWidth / track.clientWidth));
-  const currentPage = ()=> Math.round(track.scrollLeft / track.clientWidth);
-
-  function renderDots(){
-    if(!dotsWrap) return;
-    const total = pageCount();
-    if(total<=1){ dotsWrap.innerHTML=''; return; }
-    const cur = currentPage();
-    dotsWrap.innerHTML = Array.from({length:total}, (_,i)=>
-      `<button class="carousel-dot ${i===cur?'active':''}" data-page="${i}" aria-label="পেজ ${i+1}"></button>`).join('');
-  }
-  function updateArrows(){
-    if(!prev || !next) return;
-    const maxScroll = track.scrollWidth - track.clientWidth - 2; // ২px সহনশীলতা
-    prev.disabled = track.scrollLeft <= 2;
-    next.disabled = track.scrollLeft >= maxScroll;
-  }
-  function scrollByPage(dir){
-    track.scrollBy({ left: dir * track.clientWidth, behavior:'smooth' });
-  }
-
-  prev?.addEventListener('click', ()=> scrollByPage(-1));
-  next?.addEventListener('click', ()=> scrollByPage(1));
-  dotsWrap?.addEventListener('click', (e)=>{
-    const dot = e.target.closest('.carousel-dot'); if(!dot) return;
-    track.scrollTo({ left: Number(dot.dataset.page) * track.clientWidth, behavior:'smooth' });
-  });
-  track.addEventListener('scroll', ()=>{
-    clearTimeout(track._t);
-    track._t = setTimeout(()=>{ renderDots(); updateArrows(); }, 90);
-  });
-  window.addEventListener('resize', ()=>{ renderDots(); updateArrows(); });
-
-  renderDots(); updateArrows();
+  const grid = $('#featured-apps-grid');
+  if(!grid) return;
+  renderGrid(grid, PRODUCTS.slice(0,3));
 }
 
 /* ---------- ক্যাটালগ পেজ: সার্চ + ক্যাটাগরি ফিল্টার ---------- */
@@ -496,19 +433,14 @@ function ensureModal(){
 }
 function openBuyModal(product){
   ensureModal();
-  // দাম + billing লেজুড় (যেমন ৳৫০০/মাস) — কিস্তির তথ্য থাকলে সেটাও বার্তায় যোগ হয়,
-  // যাতে অর্ডারের মেসেজ দেখেই বোঝা যায় কোন প্যাকেজে কিনতে চাইছে
-  const priceText = fmtTaka(product.price) + billingSuffix(product);
-  const ins = installmentText(product);
-  $('#buy-modal-appname').textContent = product.name + ' — ' + priceText + (product.priceNote?' ('+product.priceNote+')':'') + (ins? ' · '+ins : '');
+  $('#buy-modal-appname').textContent = product.name + ' — ' + fmtTaka(product.price) + (product.priceNote?' ('+product.priceNote+')':'');
   $('#buy-modal-appname').dataset.appName = product.name;
-  $('#buy-modal-appname').dataset.appPrice = priceText + (ins? ' ('+ins+')' : '');
+  $('#buy-modal-appname').dataset.appPrice = fmtTaka(product.price);
   $('#bkash-number-text').textContent = SITE_CONFIG.bkashNumber;
   $('#nagad-number-text').textContent = SITE_CONFIG.nagadNumber;
-  const previewText = `আপনি কিনছেন: ${product.name} — ${priceText}${ins? '\n'+ins : ''}`;
-  $('#wa-preview-text').textContent = previewText;
+  $('#wa-preview-text').textContent = `আপনি কিনছেন: ${product.name} — ${fmtTaka(product.price)}`;
   const msgPreview = $('#msg-preview-text');
-  if(msgPreview) msgPreview.textContent = previewText;
+  if(msgPreview) msgPreview.textContent = `আপনি কিনছেন: ${product.name} — ${fmtTaka(product.price)}`;
   $('#buy-modal').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
