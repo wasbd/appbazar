@@ -136,19 +136,19 @@ const PRODUCTS = [
     ],
     status:'soon'
   },
-  {
+   {
     slug:'kgs',
-    name:'KG School Management',
-    tagline:'কিন্ডারগার্টেন স্কুল বা বেসরকারি প্রাইমারি স্কুল ম্যানেজমেন্ট এপ',
+    name:'KG School/Madrasa/ Management App',
+    tagline:'কিন্ডারগার্টেন স্কুল / বেসরকারি প্রাইমারি স্কুল / মাদ্রাসা ম্যানেজমেন্ট এপ',
     description:
 `একটি কিন্ডারগার্টেন স্কুলের সকল প্রকার কার্যাদি নির্বাহ করার প্রয়াসে এপটি আপনার জন্য সহায়ক ভূমিকা রাখবে।`,
     category:'education',
-    price:1,
-    priceNote:'৭৯৯/মাস',
+    price:799,
+    billing:'monthly',
     thumbnail:'https://i.ibb.co.com/k2gS6r0f/Screenshot-2026-09-18-125601.png',
     icon:'🧾',
     accent:'violet',
     features:[],
     status:'live'
-  }
+  },
 ];
