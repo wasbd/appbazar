@@ -107,7 +107,7 @@ const PRODUCTS = [
     ],
     status:'live'
   },
-    {
+  {
     slug:'pk',
     name:'পড়ার খাতা-Study Ledger',
     tagline:'কোচিং সেন্টার ও প্রাইভেট টিউটর অথবা অভিভাবকদের জন্য সম্পূর্ণ ম্যানেজমেন্ট অ্যাপ',
@@ -122,8 +122,8 @@ const PRODUCTS = [
     priceNote:'সেটআপসহ [কাস্টমাইজেশন করতে চার্জ প্রযোজ্য]',
     thumbnail:'https://i.ibb.co.com/kVzbkht5/image.png',
     icon:'📘',
-    accent:'pink',
-    demoUrl:'#',
+    accent:'teal',
+    demoUrl:'https://sldmo.netlify.app/',
     features:[
       'শ্রেণি-ভিত্তিক বা একক শিক্ষার্থী-ভিত্তিক পড়া/টাস্ক প্রদান',
       'সাপ্তাহিক রুটিন — ক্লাস ও শিক্ষার্থী ধরে সাজানো',
