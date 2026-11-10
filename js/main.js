@@ -7,23 +7,23 @@
 
 const SITE_CONFIG = {
   siteName: 'অ্যাপবাজার',
-  ownerName: 'আপনার নাম / প্রতিষ্ঠানের নাম',
+  ownerName: 'Web App Solution (WAS)/ Easy Tech Solution, Chattogram (ETS)',
   tagline: 'স্থানীয় ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
-  email: 'you@example.com',
-  whatsappNumber: '8801XXXXXXXXX',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
-  messengerUsername: '',             // আপনার Facebook Page-এর ইউজারনেম, যেমনঃ 'apps.bazaar'
+  email: 'info.wasbd@gmail.com',
+  whatsappNumber: '8801869866899',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
+  messengerUsername: 'etsctg',             // আপনার Facebook Page-এর ইউজারনেম, যেমনঃ 'apps.bazaar'
                                       // (আপনার পেজের লিংক facebook.com/apps.bazaar হলে
                                       // এখানে শুধু 'apps.bazaar' বসান) — খালি রাখলে
                                       // "কিনুন" মডালে মেসেঞ্জার অপশন দেখাবে না।
                                       // ⚠️ এটা একটা Facebook PAGE-এর ইউজারনেম হতে হবে,
                                       // ব্যক্তিগত প্রোফাইল দিয়ে কাজ করে না।
   bkashNumber: '01740541388',
-  paymentQrImage: 'assets/images/bkash-qr.jpg',  // পেমেন্ট QR ছবির পাথ — খালি ('') রাখলে QR দেখাবে না
+  paymentQrImage: 'assets/images/bkash-qr.jpg',  // পেমেন্ট Bangla QR ছবি — খালি ('') রাখলে QR দেখাবে না
   nagadNumber: '01XXXXXXXXX',
-  facebook: '#',
+  facebook: 'https://www.facebook.com/etsctg',
   socialLinks: [
-    { label:'Facebook', icon:'f', url:'#' },
-    { label:'YouTube',  icon:'▶', url:'#' },
+    { label:'Facebook', icon:'f', url:'https://www.facebook.com/etsctg' },
+    { label:'YouTube',  icon:'▶', url:'https://www.youtube.com/etsctg' },
   ],
 
   /* ------------------------------------------------------------------
@@ -63,13 +63,13 @@ const SITE_CONFIG = {
            লিংকটা পাবেন তাতে entry.123456789=আপনার-টেস্ট-উত্তর এভাবে
            প্রতিটা প্রশ্নের entry নম্বর দেখা যাবে — সেগুলো নিচে বসান।
   */
-  googleFormUrl: '', // যেমনঃ 'https://docs.google.com/forms/d/e/xxxxxxxxxxxxxxxx/formResponse'
+  googleFormUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfR63v8riPeN0yj2GzvgyR5TrKjVHCBU_177DCT0yMvXKe5Eg/formResponse', // যেমনঃ 'https://docs.google.com/forms/d/e/xxxxxxxxxxxxxxxx/formResponse'
   googleFormFields: {
-    name:   '', // যেমনঃ 'entry.123456789'
-    phone:  '',
-    app:    '',
-    method: '',
-    txn:    '',
+    name:   'entry.1424131309', // যেমনঃ 'entry.123456789'
+    phone:  'entry.1591740007',
+    app:    'entry.1788626843',
+    method: 'entry.297105138',
+    txn:    'entry.260849311',
   },
 };
 
@@ -384,6 +384,23 @@ function initDetailPage(){
 }
 
 /* ---------- "কিনুন" মডাল ---------- */
+/* কাস্টমারের নাম/মোবাইল — এক ফর্মে লিখলে বাকি সব ফর্মেও বসে যায়, আর ব্রাউজারে মনে থাকে */
+function customerStore(){ try{ return JSON.parse(localStorage.getItem('appbazar_customer')||'{}'); }catch(e){ return {}; } }
+function restoreCustomer(){
+  const c = customerStore();
+  $$('#buy-modal input[name="name"]').forEach(i=>{ if(c.name) i.value = c.name; });
+  $$('#buy-modal input[name="phone"]').forEach(i=>{ if(c.phone) i.value = c.phone; });
+}
+function bindCustomerSync(root){
+  ['name','phone'].forEach(field=>{
+    $$(`input[name="${field}"]`, root).forEach(inp=>{
+      inp.addEventListener('input', ()=>{
+        $$(`input[name="${field}"]`, root).forEach(o=>{ if(o!==inp) o.value = inp.value; });
+        try{ localStorage.setItem('appbazar_customer', JSON.stringify({ ...customerStore(), [field]: inp.value })); }catch(e){}
+      });
+    });
+  });
+}
 function ensureModal(){
   if($('#buy-modal')) return;
   const hasMessenger = !!SITE_CONFIG.messengerUsername;
@@ -396,11 +413,11 @@ function ensureModal(){
       <h3 id="buy-modal-title">কিনুন</h3>
       <p class="modal-app-name" id="buy-modal-appname"></p>
       <div class="buy-tabs">
-        <button class="buy-tab active" data-tab="whatsapp">💬 WhatsApp</button>
+        <button class="buy-tab active" data-tab="manual">💳 bKash/Nagad</button>
+        <button class="buy-tab" data-tab="whatsapp">💬 WhatsApp</button>
         ${hasMessenger ? `<button class="buy-tab" data-tab="messenger">📩 মেসেঞ্জার</button>` : ''}
-        <button class="buy-tab" data-tab="manual">📷 QR / bKash/Nagad</button>
       </div>
-      <div class="pay-panel active" data-panel="whatsapp">
+      <div class="pay-panel" data-panel="whatsapp">
         <div class="wa-preview" id="wa-preview-text"></div>
         <form id="whatsapp-order-form">
           <div class="form-field"><label>আপনার নাম</label><input type="text" name="name" required /></div>
@@ -418,12 +435,17 @@ function ensureModal(){
         </form>
         <p class="pay-note">মেসেঞ্জার খুলে গেলে বার্তাটা আগে থেকেই লেখা থাকবে — শুধু Send চাপুন। কোনো কারণে লেখা না এলে, নিজে থেকে অ্যাপের নাম উল্লেখ করে একটা মেসেজ পাঠিয়ে দিন।</p>
       </div>` : ''}
-      <div class="pay-panel" data-panel="manual">
+      <div class="pay-panel active" data-panel="manual">
+        <div class="amount-box">
+          <span>পাঠাতে হবে</span>
+          <b id="pay-amount-text"></b>
+          <small id="pay-amount-sub"></small>
+        </div>
         ${SITE_CONFIG.paymentQrImage ? `
         <div class="qr-box">
-          <img src="${SITE_CONFIG.paymentQrImage}" alt="পেমেন্ট করার Bangla QR কোড" class="qr-img" id="pay-qr-img" />
+          <img src="${SITE_CONFIG.paymentQrImage}" alt="পেমেন্ট করার Bangla QR কোড" class="qr-img" />
           <p class="qr-title">📷 যেকোনো অ্যাপ দিয়ে QR স্ক্যান করে টাকা পাঠান</p>
-          <p class="qr-sub">bKash, Nagad, Rocket, Upay বা যেকোনো ব্যাংক অ্যাপ (Bangla QR সাপোর্টেড)</p>
+          <p class="qr-sub">bKash, Nagad, Rocket, Upay বা যেকোনো ব্যাংক অ্যাপ (Bangla QR সাপোর্টেড)। টাকার পরিমাণ উপরের লেখা অনুযায়ী নিজে বসাতে হবে।</p>
           <a class="btn btn-dark qr-download" href="${SITE_CONFIG.paymentQrImage}" download="payment-qr.jpg">⬇️ QR ছবি ডাউনলোড (মোবাইলে স্ক্যান করতে)</a>
         </div>` : ''}
         <div class="pay-number-box">
@@ -434,8 +456,10 @@ function ensureModal(){
           <div><span class="method">Nagad (Personal/Send Money)</span><b id="nagad-number-text"></b></div>
           <button class="copy-btn" data-copy-target="nagad-number-text">কপি</button>
         </div>
-        <p class="pay-note">QR স্ক্যান করে (অথবা নিচের নম্বরে) টাকা পাঠিয়ে ফর্মটা পূরণ করুন — অর্ডার কনফার্ম করে দ্রুত যোগাযোগ করা হবে।</p>
+        <p class="pay-note">QR স্ক্যান করে (অথবা উপরের নম্বরে) টাকা পাঠিয়ে নিচের ফর্মটা পূরণ করুন — অর্ডার কনফার্ম করে দ্রুত যোগাযোগ করা হবে।</p>
         <form id="manual-order-form">
+          <div class="form-field"><label>অ্যাপ (স্বয়ংক্রিয়)</label><input type="text" name="app" id="manual-app-input" readonly /></div>
+          <div class="form-field"><label>টাকার পরিমাণ (স্বয়ংক্রিয়)</label><input type="text" name="amount" id="manual-amount-input" readonly /></div>
           <div class="form-field"><label>আপনার নাম</label><input type="text" name="name" required /></div>
           <div class="form-field"><label>মোবাইল নম্বর</label><input type="tel" name="phone" required /></div>
           <div class="form-field"><label>পেমেন্ট মাধ্যম</label>
@@ -447,6 +471,7 @@ function ensureModal(){
       </div>
     </div>`;
   document.body.appendChild(el);
+  bindCustomerSync(el);
 
   el.addEventListener('click', (e)=>{ if(e.target===el) closeBuyModal(); });
   $('#buy-modal-close').addEventListener('click', closeBuyModal);
@@ -474,6 +499,7 @@ function ensureModal(){
     window.open(waLink(msg), '_blank');
     toast('WhatsApp খুলে যাচ্ছে — বার্তাটা পাঠাতে ভুলবেন না! ✅');
     e.target.reset();
+    restoreCustomer();
     closeBuyModal();
   });
   $('#messenger-order-form')?.addEventListener('submit', (e)=>{
@@ -487,6 +513,7 @@ function ensureModal(){
     window.open(messengerLink(msg), '_blank');
     toast('মেসেঞ্জার খুলে যাচ্ছে — বার্তাটা পাঠাতে ভুলবেন না! ✅');
     e.target.reset();
+    restoreCustomer();
     closeBuyModal();
   });
   $('#manual-order-form').addEventListener('submit', (e)=>{
@@ -494,11 +521,13 @@ function ensureModal(){
     const f = new FormData(e.target);
     const name = f.get('name'), phone = f.get('phone'), method = f.get('method'), txn = f.get('txn');
     const appName = $('#buy-modal-appname').dataset.appName || '';
-    const msg = `অর্ডার নিশ্চিতকরণ\nঅ্যাপ: ${appName}\nনাম: ${name}\nমোবাইল: ${phone}\nপেমেন্ট: ${method}\nট্রানজেকশন আইডি: ${txn}`;
-    submitOrderBackup({ name, phone, app: appName, method, txn });
+    const appPrice = $('#buy-modal-appname').dataset.appPrice || '';
+    const msg = `অর্ডার নিশ্চিতকরণ\nঅ্যাপ: ${appName}\nপরিমাণ: ${appPrice}\nনাম: ${name}\nমোবাইল: ${phone}\nপেমেন্ট: ${method}\nট্রানজেকশন আইডি: ${txn}`;
+    submitOrderBackup({ name, phone, app: appName + (appPrice ? ' — '+appPrice : ''), method, txn });
     window.open(waLink(msg), '_blank');
     toast('অর্ডার তথ্য পাঠানো হয়েছে — শীঘ্রই যোগাযোগ করা হবে ✅');
     e.target.reset();
+    restoreCustomer();
     closeBuyModal();
   });
 }
@@ -511,6 +540,12 @@ function openBuyModal(product){
   $('#buy-modal-appname').textContent = product.name + ' — ' + priceText + (product.priceNote?' ('+product.priceNote+')':'') + (ins? ' · '+ins : '');
   $('#buy-modal-appname').dataset.appName = product.name;
   $('#buy-modal-appname').dataset.appPrice = priceText + (ins? ' ('+ins+')' : '');
+  $('#pay-amount-text').textContent = priceText;
+  $('#pay-amount-sub').textContent = product.name + (ins ? ' · ' + ins : '');
+  $('#manual-app-input').value = product.name;
+  $('#manual-amount-input').value = priceText;
+  // আগের দেওয়া নাম/মোবাইল মনে রেখে সব ফর্মে বসিয়ে দেয়
+  restoreCustomer();
   $('#bkash-number-text').textContent = SITE_CONFIG.bkashNumber;
   $('#nagad-number-text').textContent = SITE_CONFIG.nagadNumber;
   const previewText = `আপনি কিনছেন: ${product.name} — ${priceText}${ins? '\n'+ins : ''}`;
