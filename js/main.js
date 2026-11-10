@@ -7,22 +7,23 @@
 
 const SITE_CONFIG = {
   siteName: 'অ্যাপবাজার',
-  ownerName: 'Web App Solution (WAS)/ Easy Tech Solution, Chattogram (ETS)',
+  ownerName: 'আপনার নাম / প্রতিষ্ঠানের নাম',
   tagline: 'স্থানীয় ব্যবসা ও প্রতিষ্ঠানের জন্য তৈরি, ব্যবহার-বান্ধব ওয়েব অ্যাপ',
-  email: 'info.wasbd@gmail.com',
-  whatsappNumber: '8801869866899',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
-  messengerUsername: 'etsctg',             // আপনার Facebook Page-এর ইউজারনেম, যেমনঃ 'apps.bazaar'
+  email: 'you@example.com',
+  whatsappNumber: '8801XXXXXXXXX',   // দেশের কোড-সহ, শুরুতে + বা ০ ছাড়া
+  messengerUsername: '',             // আপনার Facebook Page-এর ইউজারনেম, যেমনঃ 'apps.bazaar'
                                       // (আপনার পেজের লিংক facebook.com/apps.bazaar হলে
                                       // এখানে শুধু 'apps.bazaar' বসান) — খালি রাখলে
                                       // "কিনুন" মডালে মেসেঞ্জার অপশন দেখাবে না।
                                       // ⚠️ এটা একটা Facebook PAGE-এর ইউজারনেম হতে হবে,
                                       // ব্যক্তিগত প্রোফাইল দিয়ে কাজ করে না।
   bkashNumber: '01740541388',
+  paymentQrImage: 'assets/images/bkash-qr.jpg',  // পেমেন্ট QR ছবির পাথ — খালি ('') রাখলে QR দেখাবে না
   nagadNumber: '01XXXXXXXXX',
-  facebook: 'https://www.facebook.com/etsctg',
+  facebook: '#',
   socialLinks: [
-    { label:'Facebook', icon:'f', url:'https://www.facebook.com/etsctg' },
-    { label:'YouTube',  icon:'▶', url:'https://www.youtube.com/etsctg' },
+    { label:'Facebook', icon:'f', url:'#' },
+    { label:'YouTube',  icon:'▶', url:'#' },
   ],
 
   /* ------------------------------------------------------------------
@@ -62,13 +63,13 @@ const SITE_CONFIG = {
            লিংকটা পাবেন তাতে entry.123456789=আপনার-টেস্ট-উত্তর এভাবে
            প্রতিটা প্রশ্নের entry নম্বর দেখা যাবে — সেগুলো নিচে বসান।
   */
-  googleFormUrl: 'https://docs.google.com/forms/d/e/1FAIpQLSfR63v8riPeN0yj2GzvgyR5TrKjVHCBU_177DCT0yMvXKe5Eg/formResponse', // যেমনঃ 'https://docs.google.com/forms/d/e/xxxxxxxxxxxxxxxx/formResponse'
+  googleFormUrl: '', // যেমনঃ 'https://docs.google.com/forms/d/e/xxxxxxxxxxxxxxxx/formResponse'
   googleFormFields: {
-    name:   'entry.1424131309', // যেমনঃ 'entry.123456789'
-    phone:  'entry.1591740007',
-    app:    'entry.1788626843',
-    method: 'entry.297105138',
-    txn:    'entry.260849311',
+    name:   '', // যেমনঃ 'entry.123456789'
+    phone:  '',
+    app:    '',
+    method: '',
+    txn:    '',
   },
 };
 
@@ -397,7 +398,7 @@ function ensureModal(){
       <div class="buy-tabs">
         <button class="buy-tab active" data-tab="whatsapp">💬 WhatsApp</button>
         ${hasMessenger ? `<button class="buy-tab" data-tab="messenger">📩 মেসেঞ্জার</button>` : ''}
-        <button class="buy-tab" data-tab="manual">💳 bKash/Nagad</button>
+        <button class="buy-tab" data-tab="manual">📷 QR / bKash/Nagad</button>
       </div>
       <div class="pay-panel active" data-panel="whatsapp">
         <div class="wa-preview" id="wa-preview-text"></div>
@@ -418,6 +419,13 @@ function ensureModal(){
         <p class="pay-note">মেসেঞ্জার খুলে গেলে বার্তাটা আগে থেকেই লেখা থাকবে — শুধু Send চাপুন। কোনো কারণে লেখা না এলে, নিজে থেকে অ্যাপের নাম উল্লেখ করে একটা মেসেজ পাঠিয়ে দিন।</p>
       </div>` : ''}
       <div class="pay-panel" data-panel="manual">
+        ${SITE_CONFIG.paymentQrImage ? `
+        <div class="qr-box">
+          <img src="${SITE_CONFIG.paymentQrImage}" alt="পেমেন্ট করার Bangla QR কোড" class="qr-img" id="pay-qr-img" />
+          <p class="qr-title">📷 যেকোনো অ্যাপ দিয়ে QR স্ক্যান করে টাকা পাঠান</p>
+          <p class="qr-sub">bKash, Nagad, Rocket, Upay বা যেকোনো ব্যাংক অ্যাপ (Bangla QR সাপোর্টেড)</p>
+          <a class="btn btn-dark qr-download" href="${SITE_CONFIG.paymentQrImage}" download="payment-qr.jpg">⬇️ QR ছবি ডাউনলোড (মোবাইলে স্ক্যান করতে)</a>
+        </div>` : ''}
         <div class="pay-number-box">
           <div><span class="method">bKash (Personal/Send Money)</span><b id="bkash-number-text"></b></div>
           <button class="copy-btn" data-copy-target="bkash-number-text">কপি</button>
@@ -426,7 +434,7 @@ function ensureModal(){
           <div><span class="method">Nagad (Personal/Send Money)</span><b id="nagad-number-text"></b></div>
           <button class="copy-btn" data-copy-target="nagad-number-text">কপি</button>
         </div>
-        <p class="pay-note">উপরের নম্বরে টাকা পাঠিয়ে নিচের ফর্মটা পূরণ করুন — অর্ডার কনফার্ম করে দ্রুত যোগাযোগ করা হবে।</p>
+        <p class="pay-note">QR স্ক্যান করে (অথবা নিচের নম্বরে) টাকা পাঠিয়ে ফর্মটা পূরণ করুন — অর্ডার কনফার্ম করে দ্রুত যোগাযোগ করা হবে।</p>
         <form id="manual-order-form">
           <div class="form-field"><label>আপনার নাম</label><input type="text" name="name" required /></div>
           <div class="form-field"><label>মোবাইল নম্বর</label><input type="tel" name="phone" required /></div>

@@ -362,3 +362,10 @@ section{ padding:86px 0; position:relative; }
   section{ padding:60px 0; }
   .section-head h2{ font-size:1.7rem; }
 }
+
+/* ---------- পেমেন্ট QR ---------- */
+.qr-box{ text-align:center; background:var(--bg-alt); border:2px dashed var(--border); border-radius:16px; padding:16px; margin-bottom:16px; }
+.qr-img{ width:100%; max-width:260px; height:auto; border-radius:14px; background:#fff; box-shadow:var(--shadow-sm); display:block; margin:0 auto 12px; }
+.qr-title{ font-weight:800; margin-bottom:4px; }
+.qr-sub{ color:var(--ink-soft); font-size:.85rem; margin-bottom:12px; }
+.qr-download{ font-size:.85rem; padding:10px 16px; }
