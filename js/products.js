@@ -69,10 +69,10 @@ const PRODUCTS = [
     originalPrice:800,
     billing:'monthly',
     priceNote:'সেটাপ ও প্রশিক্ষণ ফ্রি। কাস্টমাইজেশন চার্জ প্রযোজ্য।',
-    thumbnail:'https://imgur.com/a/TNP0Cxa',
+    thumbnail:'https://i.postimg.cc/kGwTCCcV/thumbnail-4-all-features.png',
     icon:'⚙️',
     accent:'teal',
-    demoUrl:'https://drive.google.com/uc?export=download&id=16IN30v3FeTO9E7YgWdRcEqa0LOkjRz-T',
+    demoUrl:'',
     features:[
       'শিক্ষক ডাটাবেস,',
       'ইউনিক আইডিকার্ড,',
