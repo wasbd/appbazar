@@ -17,6 +17,7 @@ const SITE_CONFIG = {
                                       // "কিনুন" মডালে মেসেঞ্জার অপশন দেখাবে না।
                                       // ⚠️ এটা একটা Facebook PAGE-এর ইউজারনেম হতে হবে,
                                       // ব্যক্তিগত প্রোফাইল দিয়ে কাজ করে না।
+  announcement: '✅ লাইভ ডেমো দেখে কিনুন · 📷 QR স্ক্যান করে bKash/Nagad পেমেন্ট',  // হেডারের উপরের ঘোষণা-বার; খালি ('') রাখলে দেখাবে না
   bkashNumber: '01740541388',
   paymentQrImage: 'assets/images/bkash-qr.jpg',  // পেমেন্ট Bangla QR ছবি — খালি ('') রাখলে QR দেখাবে না
   nagadNumber: '01XXXXXXXXX',
@@ -85,6 +86,97 @@ function discountPercent(p){
 /* billing অনুযায়ী দামের পাশে যে ছোট লেজুড় বসবে — যেমন ৳৫০০/মাস */
 const BILLING_SUFFIX = { monthly:'/মাস', yearly:'/বছর', onetime:'' };
 function billingSuffix(p){ return BILLING_SUFFIX[p.billing] || ''; }
+
+/* ---------- অফার ও কাউন্টডাউন ---------- */
+function offerEndMs(p){ const t = p.offerEnds ? Date.parse(p.offerEnds) : NaN; return isNaN(t) ? null : t; }
+/* ---------- সার্ভারের লাইভ সময় (কাস্টমারের ফোন/কম্পিউটারের ঘড়ি নয়) ----------
+   অফারের সময় মাপা হয় হোস্টিং সার্ভারের (GitHub Pages) সময় দিয়ে: পেজ লোডের সময় সার্ভারের
+   "Date" হেডার পড়ে ডিভাইসের ঘড়ির সাথে পার্থক্য (offset) বের করা হয়, তারপর সব হিসাব সার্ভারের সময়েই।
+   সার্ভার না পেলে দ্বিতীয় ধাপে worldtimeapi.org (Asia/Dhaka), তাও না পেলে বাধ্য হয়ে ডিভাইসের ঘড়ি। */
+let _timeOffset = 0;
+let _timeSource = 'device';   // 'server' | 'api' | 'device'
+function nowMs(){ return Date.now() + _timeOffset; }
+function withTimeout(promise, ms){
+  return Promise.race([promise, new Promise((_,rej)=> setTimeout(()=>rej(new Error('timeout')), ms))]);
+}
+async function offsetFromOwnServer(){
+  const t0 = Date.now();
+  const r = await fetch(location.pathname + '?_t=' + t0, { method:'HEAD', cache:'no-store' });
+  const t1 = Date.now();
+  const d = r.headers.get('date');
+  if(!d) throw new Error('no date header');
+  const age = Number(r.headers.get('age')) || 0;           // CDN ক্যাশে থাকা সময় যোগ
+  /* Date হেডার সেকেন্ডে কাটা থাকে, তাই গড়ে +০.৫ সেকেন্ড ধরা হলো */
+  return Date.parse(d) + age*1000 + 500 - (t0+t1)/2;
+}
+async function offsetFromTimeApi(){
+  const t0 = Date.now();
+  const r = await fetch('https://worldtimeapi.org/api/timezone/Asia/Dhaka', { cache:'no-store' });
+  const j = await r.json();
+  const t1 = Date.now();
+  return Date.parse(j.utc_datetime) - (t0+t1)/2;
+}
+async function syncServerTime(){
+  try{ _timeOffset = await withTimeout(offsetFromOwnServer(), 2500); _timeSource = 'server'; return; }catch(e){}
+  try{ _timeOffset = await withTimeout(offsetFromTimeApi(), 2500); _timeSource = 'api'; return; }catch(e){}
+  _timeOffset = 0; _timeSource = 'device';
+}
+
+/* ---------- অফার: প্রতিটা অ্যাপের মূল দাম একবার মনে রেখে সার্ভারের সময় অনুযায়ী বসানো হয় ---------- */
+PRODUCTS.forEach(p=>{
+  p._hasOffer = p.originalPrice>p.price;
+  p._offerPrice = p.price;
+  p._regPrice = p._hasOffer ? p.originalPrice : p.price;
+});
+function applyOffers(){
+  const now = nowMs();
+  PRODUCTS.forEach(p=>{
+    if(!p._hasOffer) return;
+    const e = offerEndMs(p);
+    const expired = e!==null && e<=now;       // offerEnds না থাকলে অফার সবসময় চালু থাকে
+    p.price = expired ? p._regPrice : p._offerPrice;
+    p.originalPrice = expired ? 0 : p._regPrice;
+  });
+}
+function offerActive(p){
+  const e = offerEndMs(p);
+  return e!==null && e>nowMs() && p.originalPrice>p.price && p.status!=='soon';
+}
+const bn2 = n => Number(n).toLocaleString('bn-BD',{minimumIntegerDigits:2, useGrouping:false});
+function cdTimeHtml(left){
+  const d = Math.floor(left/86400000), h = Math.floor(left%86400000/3600000),
+        m = Math.floor(left%3600000/60000), s = Math.floor(left%60000/1000);
+  const box = (v,l)=>`<span class="cd-box"><b>${v}</b><small>${l}</small></span>`;
+  return (d>0 ? box(Number(d).toLocaleString('bn-BD'),'দিন') : '') + box(bn2(h),'ঘণ্টা') + box(bn2(m),'মিনিট') + box(bn2(s),'সেকেন্ড');
+}
+function cdHtml(p, cls){
+  if(!offerActive(p)) return '';
+  return cdHtmlAt(offerEndMs(p), cls);
+}
+function cdHtmlAt(endMs, cls){
+  const showEnd = /cd-(big|small)/.test(cls||'');
+  const endTxt = showEnd ? `<small class="cd-end">শেষ হবে: ${new Date(endMs).toLocaleString('bn-BD',{timeZone:'Asia/Dhaka', day:'numeric', month:'long', hour:'numeric', minute:'2-digit'})} (বাংলাদেশ সময়)</small>` : '';
+  return `<div class="cd ${cls||''}" data-end="${endMs}"><span class="cd-label">⏰ অফার শেষ হতে</span><span class="cd-time">${cdTimeHtml(endMs-nowMs())}</span>${endTxt}</div>`;
+}
+let _cdReloading = false;
+function tickCountdowns(){
+  const now = nowMs();
+  $$('.cd').forEach(el=>{
+    const left = Number(el.dataset.end) - now;
+    if(left<=0){
+      /* অফার শেষ — একবার রিলোড দিলে নতুন দাম বসে। অসীম রিলোড ঠেকাতে ১৫ সেকেন্ডে একবারের বেশি নয় */
+      let last = 0; try{ last = Number(sessionStorage.getItem('appbazar_cd_reload'))||0; }catch(e){}
+      if(!_cdReloading && Date.now()-last > 15000){
+        _cdReloading = true;
+        try{ sessionStorage.setItem('appbazar_cd_reload', String(Date.now())); }catch(e){}
+        setTimeout(()=>location.reload(), 800);
+      }
+      el.querySelector('.cd-time').textContent = 'অফার শেষ';
+      return;
+    }
+    el.querySelector('.cd-time').innerHTML = cdTimeHtml(left);
+  });
+}
 /* installment দেওয়া থাকলে "৩ কিস্তিতে ৳১০০০ করে" ধরনের লাইন বানায় */
 function installmentText(p){
   const ins = p.installment;
@@ -142,6 +234,7 @@ function submitOrderBackup(data){
 
 /* ---------- হেডার/ফুটার/সাধারণ চেরোম বসানো (প্রতিটা পেজে একই রাখতে) ---------- */
 function paintChrome(activePage){
+  injectShopChrome();
   $$('[data-site-name]').forEach(el=> el.textContent = SITE_CONFIG.siteName);
   $$('[data-owner-name]').forEach(el=> el.textContent = SITE_CONFIG.ownerName);
   $$('[data-year]').forEach(el=> el.textContent = new Date().getFullYear());
@@ -161,6 +254,52 @@ function paintChrome(activePage){
         nav.style.cssText = 'display:flex; position:absolute; top:78px; left:0; right:0; background:#FFFCF6; flex-direction:column; padding:14px 20px; gap:4px; border-bottom:2px solid var(--border);';
       }
     });
+  }
+}
+
+
+/* ---------- ই-কমার্স স্টাইল হেডার: ঘোষণা-বার, সার্চ বক্স, ক্যাটাগরি স্ট্রিপ (সব পেজে একসাথে বসে) ---------- */
+const CAT_ICONS = { education:'🎓', business:'🏪', housing:'🏠', productivity:'⚡', personal:'👤', other:'📦' };
+function injectShopChrome(){
+  const header = $('.site-header');
+  if(!header || $('.cat-nav')) return;
+  if(SITE_CONFIG.announcement){
+    const bar = document.createElement('div');
+    bar.className = 'announce-bar';
+    bar.textContent = SITE_CONFIG.announcement;
+    header.before(bar);
+  }
+  const q = getParam('q') || '';
+  const searchHtml = (cls)=>`<form class="${cls}" action="apps.html" method="get" role="search">
+      <input type="search" name="q" value="${q.replace(/"/g,'&quot;')}" placeholder="🔍 অ্যাপ খুঁজুন..." aria-label="অ্যাপ খুঁজুন" />
+      <button type="submit" aria-label="খুঁজুন">খুঁজুন</button></form>`;
+  $('.main-nav', header)?.insertAdjacentHTML('beforebegin', searchHtml('header-search'));
+  const nav = document.createElement('div');
+  nav.className = 'cat-nav';
+  nav.innerHTML = `<div class="container">${searchHtml('mobile-search')}<div class="cat-nav-row">
+      <a href="apps.html?offers=1" class="cat-pill hot">🔥 অফার</a>
+      ${CATEGORIES.map(c=>`<a href="apps.html?cat=${c.id}" class="cat-pill">${CAT_ICONS[c.id]||'📦'} ${c.label}</a>`).join('')}
+    </div></div>`;
+  header.after(nav);
+}
+
+/* ---------- হোমপেজ: ক্যাটাগরি টাইল ও ফ্ল্যাশ সেল ---------- */
+function initShopSections(){
+  const tiles = $('#cat-tiles-row');
+  if(tiles){
+    tiles.innerHTML = CATEGORIES.map(c=>{
+      const n = PRODUCTS.filter(p=>p.category===c.id).length;
+      return n ? `<a class="cat-tile" href="apps.html?cat=${c.id}"><span class="cat-ic">${CAT_ICONS[c.id]||'📦'}</span><b>${c.label}</b><small>${Number(n).toLocaleString('bn-BD')}টি অ্যাপ</small></a>` : '';
+    }).join('');
+  }
+  const flash = $('#flash-sale');
+  if(flash){
+    const list = PRODUCTS.filter(offerActive).sort((a,b)=>offerEndMs(a)-offerEndMs(b));
+    if(list.length){
+      flash.classList.remove('hidden');
+      $('#flash-cd').innerHTML = cdHtmlAt(offerEndMs(list[0]), 'cd-head');
+      renderGrid($('#flash-grid'), list);
+    }
   }
 }
 
@@ -209,6 +348,7 @@ function appCardHtml(p){
       ${p.thumbnail? '' : (p.icon||'📦')}
       ${!soon && discountPercent(p)!==null ? `<span class="tag pink discount-badge">${discountPercent(p)}% ছাড়</span>` : ''}
       <span class="tag ${soon?'soon':p.accent} thumb-tag">${soon? 'শীঘ্রই আসছে' : (CATEGORIES.find(c=>c.id===p.category)||{}).label||''}</span>
+      ${soon ? '' : cdHtml(p,'cd-card')}
     </a>
     <div class="app-body">
       <h3><a href="app.html?slug=${p.slug}">${p.name}</a></h3>
@@ -218,7 +358,7 @@ function appCardHtml(p){
         <div class="app-actions">
           ${soon
             ? `<span class="tag soon">প্রিভিউ</span>`
-            : `<a class="btn btn-outline btn-sm" href="app.html?slug=${p.slug}">দেখুন</a>`}
+            : `<button class="btn btn-primary btn-sm" data-buy-slug="${p.slug}">🛒 কিনুন</button>`}
         </div>
       </div>
     </div>
@@ -299,10 +439,14 @@ function initCatalog(){
   chipRow.innerHTML = `<button class="category-chip active" data-cat="all">সব</button>` +
     CATEGORIES.map(c=>`<button class="category-chip" data-cat="${c.id}">${c.label}</button>`).join('');
 
-  let activeCat = 'all';
+  let activeCat = getParam('cat') || 'all';
+  const onlyOffers = getParam('offers')==='1';
+  if(searchInput && getParam('q')) searchInput.value = getParam('q');
+  $$('.category-chip', chipRow).forEach(b=>b.classList.toggle('active', b.dataset.cat===activeCat));
   function apply(){
     const q = (searchInput?.value||'').trim().toLowerCase();
     const list = PRODUCTS.filter(p=>{
+      if(onlyOffers && !offerActive(p)) return false;
       const matchCat = activeCat==='all' || p.category===activeCat;
       const matchQ = !q || (p.name+p.tagline).toLowerCase().includes(q);
       return matchCat && matchQ;
@@ -348,7 +492,7 @@ function initDetailPage(){
         <div class="price-box">
           ${soon
             ? `<p style="margin:0">এই অ্যাপটা এখনো তৈরি হচ্ছে — মুক্তি পেলে সবার আগে জানতে যোগাযোগ করে রাখতে পারেন।</p>`
-            : priceRowHtml(p, true)}
+            : cdHtml(p,'cd-big') + priceRowHtml(p, true)}
           <div class="detail-actions">
             ${soon
               ? `<a class="btn btn-dark btn-block" href="${waLink('আসসালামু আলাইকুম, \"'+p.name+'\" অ্যাপটা মুক্তি পেলে আমাকে জানাবেন।')}" target="_blank" rel="noopener">🔔 মুক্তি পেলে জানাতে বলুন</a>`
@@ -439,6 +583,7 @@ function ensureModal(){
         <div class="amount-box">
           <span>পাঠাতে হবে</span>
           <b id="pay-amount-text"></b>
+          <div id="pay-cd"></div>
           <small id="pay-amount-sub"></small>
         </div>
         ${SITE_CONFIG.paymentQrImage ? `
@@ -541,6 +686,7 @@ function openBuyModal(product){
   $('#buy-modal-appname').dataset.appName = product.name;
   $('#buy-modal-appname').dataset.appPrice = priceText + (ins? ' ('+ins+')' : '');
   $('#pay-amount-text').textContent = priceText;
+  $('#pay-cd').innerHTML = cdHtml(product,'cd-small');
   $('#pay-amount-sub').textContent = product.name + (ins ? ' · ' + ins : '');
   $('#manual-app-input').value = product.name;
   $('#manual-amount-input').value = priceText;
@@ -561,12 +707,17 @@ function closeBuyModal(){
 }
 
 /* ---------- বুট ---------- */
-document.addEventListener('DOMContentLoaded', ()=>{
+document.addEventListener('DOMContentLoaded', async ()=>{
+  await syncServerTime();   // আগে সার্ভারের সময় নিয়ে আসা, তারপর অফার ও পেজ রেন্ডার
+  applyOffers();
   const page = document.body.dataset.page || '';
   paintChrome(page);
+  initShopSections();
   initHomeApps();
   initCatalog();
   initDetailPage();
+  tickCountdowns();
+  setInterval(tickCountdowns, 1000);
 
   // "কিনুন" বাটন — হোম/ক্যাটালগ কার্ড থেকেও যদি সরাসরি খোলার দরকার হয়
   document.addEventListener('click', (e)=>{
