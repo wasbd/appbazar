@@ -41,6 +41,12 @@
   .steps-mini{ margin-top:24px; }
   .steps-mini li{ margin-bottom:10px; font-size:.92rem; color:var(--ink-soft); }
   .sticky-actions{ position:sticky; top:20px; }
+  .offer-field{ background:#FFF1F4; border:2px dashed var(--pink); border-radius:14px; padding:14px; }
+  .quick-row{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .quick-row button{ border:2px solid var(--border); background:#fff; border-radius:10px; padding:6px 12px; font-weight:600; font-size:.85rem; }
+  .quick-row button:hover{ border-color:var(--pink); color:var(--pink-dark); }
+  .offer-warn{ margin-top:8px; background:#FFF1D2; border:1px solid var(--yellow-dark); color:#6b4f00; border-radius:10px; padding:8px 12px; font-size:.84rem; }
+  .offer-list li{ margin-bottom:6px; font-size:.9rem; color:var(--ink-soft); }
 </style>
 </head>
 <body>
@@ -98,6 +104,20 @@
           <label>পূর্বের/নিয়মিত দাম (ঐচ্ছিক — অফার থাকলে দিন)</label>
           <input type="number" name="originalPrice" id="f-originalPrice" min="0" placeholder="যেমনঃ 3500" />
           <div class="preview-note">উপরের দামের চেয়ে বেশি হলে এটা কাটা-দাগসহ ধূসর রঙে দেখাবে + ছাড়ের ব্যাজ। খালি রাখলে কিছু দেখাবে না।</div>
+        </div>
+        <div class="form-field offer-field">
+          <label>⏰ অফার শেষের সময় — বাংলাদেশ সময় (ঐচ্ছিক)</label>
+          <input type="datetime-local" name="offerEnds" id="f-offerEnds" />
+          <div class="quick-row">
+            <button type="button" data-add-hours="24">+২৪ ঘণ্টা</button>
+            <button type="button" data-add-hours="72">+৩ দিন</button>
+            <button type="button" data-add-hours="168">+৭ দিন</button>
+            <button type="button" data-add-hours="360">+১৫ দিন</button>
+            <button type="button" id="clear-offer">❌ মুছুন</button>
+          </div>
+          <div class="preview-note">এখনকার বাংলাদেশ সময় (সার্ভার থেকে লাইভ): <b id="bd-now">লোড হচ্ছে...</b></div>
+          <div class="preview-note">দিলে সাইটে কাউন্টডাউন চলবে (কার্ড, ডিটেইল পেজ, কিনুন-মডাল ও হোমপেজের ফ্ল্যাশ সেলে)। সময় মাপা হয় সার্ভারের লাইভ সময়ে, কাস্টমারের ঘড়িতে নয়। সময় শেষ হলে নিজে থেকে দাম নিয়মিত দামে ফিরে যায়। <b>অফার কাজ করতে উপরের "পূর্বের/নিয়মিত দাম" অবশ্যই "দাম"-এর চেয়ে বেশি দিতে হবে।</b></div>
+          <div class="offer-warn hidden" id="offer-warn"></div>
         </div>
         <div class="form-field">
           <label>দাম কোন হিসেবে</label>
@@ -162,6 +182,10 @@
         <h2>২. প্রিভিউ</h2>
         <div class="apps-grid" style="grid-template-columns:1fr" id="live-preview"></div>
       </div>
+      <div class="helper-card" style="margin-bottom:20px">
+        <h2>🔥 বর্তমান অফার (products.js অনুযায়ী)</h2>
+        <ul class="offer-list" id="offer-list" style="padding-left:18px; margin:0"></ul>
+      </div>
       <div class="helper-card">
         <h2>৩. এই কোডটুকু কপি করুন</h2>
         <div id="code-output" class="code-out">ফর্ম পূরণ শুরু করুন...</div>
@@ -178,6 +202,59 @@
 
 <script src="js/products.js"></script>
 <script>
+/* ---------- সার্ভারের লাইভ সময় (সাইটের মতোই) ---------- */
+let _timeOffset = 0, _timeSource = 'device';
+function nowMs(){ return Date.now() + _timeOffset; }
+function withTimeout(pr, ms){ return Promise.race([pr, new Promise((_,rej)=> setTimeout(()=>rej(new Error('timeout')), ms))]); }
+async function offsetFromOwnServer(){
+  const t0 = Date.now();
+  const r = await fetch(location.pathname + '?_t=' + t0, { method:'HEAD', cache:'no-store' });
+  const t1 = Date.now();
+  const d = r.headers.get('date'); if(!d) throw new Error('no date');
+  return Date.parse(d) + (Number(r.headers.get('age'))||0)*1000 + 500 - (t0+t1)/2;
+}
+async function offsetFromTimeApi(){
+  const t0 = Date.now();
+  const j = await (await fetch('https://worldtimeapi.org/api/timezone/Asia/Dhaka', { cache:'no-store' })).json();
+  return Date.parse(j.utc_datetime) - (Date.now()+t0)/2;
+}
+async function syncServerTime(){
+  try{ _timeOffset = await withTimeout(offsetFromOwnServer(), 2500); _timeSource='server'; return; }catch(e){}
+  try{ _timeOffset = await withTimeout(offsetFromTimeApi(), 2500); _timeSource='api'; return; }catch(e){}
+  _timeOffset = 0; _timeSource = 'device';
+}
+const BD_OFFSET_MS = 6*3600*1000;   // বাংলাদেশ = UTC+6
+/* ms → datetime-local ইনপুটের মান ("YYYY-MM-DDTHH:MM", বাংলাদেশ সময়ে) */
+function toBdLocalInput(ms){ return new Date(ms + BD_OFFSET_MS).toISOString().slice(0,16); }
+/* ইনপুটের মান → offerEnds স্ট্রিং, সবসময় +06:00 সহ (অ্যাডমিনের ডিভাইসের টাইমজোন যাই হোক) */
+function fromBdLocalInput(v){ return v ? v + ':00+06:00' : ''; }
+function bdText(ms){ return new Date(ms).toLocaleString('bn-BD',{timeZone:'Asia/Dhaka', day:'numeric', month:'long', year:'numeric', hour:'numeric', minute:'2-digit'}); }
+function leftText(ms){
+  const left = ms - nowMs();
+  if(left<=0) return 'শেষ হয়ে গেছে';
+  const d=Math.floor(left/86400000), h=Math.floor(left%86400000/3600000), m=Math.floor(left%3600000/60000);
+  return `বাকি ${d?d.toLocaleString('bn-BD')+' দিন ':''}${h.toLocaleString('bn-BD')} ঘণ্টা ${m.toLocaleString('bn-BD')} মিনিট`;
+}
+function renderBdNow(){
+  const el = document.getElementById('bd-now'); if(!el) return;
+  const src = {server:'সার্ভার', api:'ইন্টারনেট ঘড়ি', device:'⚠️ ডিভাইসের ঘড়ি (সার্ভারের সময় পাওয়া যায়নি — লোকালি ফাইল খুললে এমন হয়)'}[_timeSource];
+  el.textContent = new Date(nowMs()).toLocaleString('bn-BD',{timeZone:'Asia/Dhaka', day:'numeric', month:'long', hour:'numeric', minute:'2-digit', second:'2-digit'}) + ' — সূত্র: ' + src;
+}
+function renderOfferList(){
+  const ul = document.getElementById('offer-list'); if(!ul) return;
+  const rows = PRODUCTS.filter(p=>p.offerEnds || p.originalPrice>p.price).map(p=>{
+    const e = p.offerEnds ? Date.parse(p.offerEnds) : null;
+    const state = e===null ? 'সময়সীমা নেই (সবসময় চালু)' : (e>nowMs() ? '🟢 চলছে — ' + leftText(e) + ' (শেষ: ' + bdText(e) + ')' : '🔴 শেষ — দাম নিয়মিত দামে ফিরে গেছে');
+    return `<li><b>${p.name}</b><br>${state}</li>`;
+  });
+  ul.innerHTML = rows.length ? rows.join('') : '<li>এখন কোনো অ্যাপে অফার সেট করা নেই।</li>';
+}
+document.querySelectorAll('[data-add-hours]').forEach(btn=> btn.addEventListener('click', ()=>{
+  document.getElementById('f-offerEnds').value = toBdLocalInput(nowMs() + Number(btn.dataset.addHours)*3600000);
+  generate();
+}));
+document.getElementById('clear-offer').addEventListener('click', ()=>{ document.getElementById('f-offerEnds').value=''; generate(); });
+
 const ACCENTS = ['pink','teal','yellow','violet'];
 const ACCENT_HEX = { pink:'#FF3E70', teal:'#04A777', yellow:'#FFB627', violet:'#7B5CFA' };
 const ICON_SUGGESTIONS = ['📦','📘','🧾','🗂️','🛒','📊','🏪','🎓','💊','🚗','🏠','⚙️','📅','💬','🍽️'];
@@ -247,6 +324,7 @@ function fillForm(p){
   document.getElementById('f-category').value = p.category;
   document.getElementById('f-price').value = p.price;
   document.getElementById('f-originalPrice').value = p.originalPrice||'';
+  document.getElementById('f-offerEnds').value = (p.offerEnds && !isNaN(Date.parse(p.offerEnds))) ? toBdLocalInput(Date.parse(p.offerEnds)) : '';
   document.getElementById('f-billing').value = p.billing||'onetime';
   document.getElementById('f-insCount').value = (p.installment&&p.installment.count)||'';
   document.getElementById('f-insAmount').value = (p.installment&&p.installment.amount)||'';
@@ -276,6 +354,7 @@ function collect(){
     category: document.getElementById('f-category').value,
     price: Number(document.getElementById('f-price').value)||0,
     originalPrice: Number(document.getElementById('f-originalPrice').value)||0,
+    offerEnds: fromBdLocalInput(document.getElementById('f-offerEnds').value),
     billing: document.getElementById('f-billing').value,
     insCount: Number(document.getElementById('f-insCount').value)||0,
     insAmount: Number(document.getElementById('f-insAmount').value)||0,
@@ -301,6 +380,7 @@ function buildSnippet(d){
   lines.push(`    category:'${d.category}',`);
   lines.push(`    price:${d.price},`);
   if(d.originalPrice) lines.push(`    originalPrice:${d.originalPrice},`);
+  if(d.offerEnds) lines.push(`    offerEnds:'${d.offerEnds}',   // বাংলাদেশ সময়`);
   if(d.billing && d.billing!=='onetime') lines.push(`    billing:'${d.billing}',`);
   if(d.insCount && d.insAmount) lines.push(`    installment:{ count:${d.insCount}, amount:${d.insAmount} },`);
   if(d.priceNote) lines.push(`    priceNote:'${escSingle(d.priceNote)}',`);
@@ -336,8 +416,22 @@ function discountPercentLocal(d){
   return Math.round((1 - d.price/d.originalPrice)*100);
 }
 
+function offerWarnings(d){
+  const w = [];
+  if(d.offerEnds){
+    const e = Date.parse(d.offerEnds);
+    if(!d.originalPrice || d.originalPrice<=d.price) w.push('⚠️ "পূর্বের/নিয়মিত দাম" "দাম"-এর চেয়ে বেশি না হলে অফার/কাউন্টডাউন দেখাবে না।');
+    if(e<=nowMs()) w.push('⚠️ এই সময় পার হয়ে গেছে — অফার শুরুতেই বন্ধ ধরা হবে।');
+    else if(d.status==='soon') w.push('⚠️ স্ট্যাটাস "শীঘ্রই আসছে" থাকলে অফার দেখাবে না।');
+  }
+  return w;
+}
 function generate(){
   const d = collect();
+  const warnEl = document.getElementById('offer-warn');
+  const ws = offerWarnings(d);
+  warnEl.classList.toggle('hidden', !ws.length);
+  warnEl.innerHTML = ws.join('<br>');
   document.getElementById('code-output').textContent = (d.slug && d.name) ? buildSnippet(d) : 'অন্তত নাম ও slug দিন...';
   const catLabel = (CATEGORIES.find(c=>c.id===d.category)||{}).label || '';
   const disc = discountPercentLocal(d);
@@ -353,6 +447,7 @@ function generate(){
         <p class="app-tagline">${d.tagline||'এখানে ট্যাগলাইন দেখাবে'}</p>
         <div class="app-meta-row">
           <div class="app-price">${d.status==='soon'?'—':fmtTakaLocal(d.price)}<span class="price-suffix">${d.status==='soon'?'':billingSuffixLocal(d)}</span> ${(d.status!=='soon' && d.priceNote)?`<small>${d.priceNote}</small>`:''}
+            ${(d.status!=='soon' && disc!==null && d.offerEnds) ? `<div class="price-installment" style="background:#FFF1F4;color:var(--pink-dark)">⏰ ${leftText(Date.parse(d.offerEnds))}</div>` : ''}
             ${(d.status!=='soon' && disc!==null) ? `<div class="price-was">${fmtTakaLocal(d.originalPrice)}${billingSuffixLocal(d)}</div>` : ''}
             ${(d.status!=='soon' && d.insCount && d.insAmount) ? `<div class="price-installment">🗓️ অথবা ${Number(d.insCount).toLocaleString('bn-BD')} কিস্তিতে ${fmtTakaLocal(d.insAmount)} করে</div>` : ''}
           </div>
@@ -374,6 +469,7 @@ document.getElementById('copy-code-btn').addEventListener('click', ()=>{
 });
 
 generate();
+syncServerTime().then(()=>{ renderBdNow(); renderOfferList(); generate(); setInterval(()=>{ renderBdNow(); renderOfferList(); }, 1000); });
 </script>
 </body>
 </html>
