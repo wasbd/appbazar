@@ -40,7 +40,7 @@ const CATEGORIES = [
 ];
 
 const PRODUCTS = [
- {
+   {
     slug:'school-management-system',
     name:'স্কুল ম্যানেজমেন্ট সিস্টেম (School Management System)',
     tagline:'সরকারি প্রাথমিক বিদ্যালয়ের শিক্ষক, শিক্ষার্থীদের_ ভর্তি, পরীক্ষা, শ্রেণিকার্যক্রম, রুটিন, পড়ার তালিকা, উপস্থিতি, ফলাফলসহ বিবিধ কাজ সহজেকরতে আজই সংগ্রহ করুন আপনার বিদ্যালয়ের সফটওয়্যারটি।',
@@ -65,8 +65,9 @@ const PRODUCTS = [
 কিভাবে কিনবেন: 
 এপবাজার ওয়েব সাইটে এপটির কিনুন বাটনে ক্লিক করে যেকোন ব্যাংক এপ থেকে Bangla QR টি স্ক্যান করে পে করা যাবে।`,
     category:'education',
-    price:500,
+    price:400,
     originalPrice:800,
+    offerEnds:'2026-12-16T00:00:00+06:00',   // বাংলাদেশ সময়
     billing:'monthly',
     priceNote:'[প্রমোশনাল অফার] সেটাপ ও প্রশিক্ষণসহ। কাস্টমাইজেশন চার্জ প্রযোজ্য।',
     thumbnail:'https://i.postimg.cc/kGwTCCcV/thumbnail-4-all-features.png',
